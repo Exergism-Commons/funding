@@ -1,0 +1,92 @@
+schema_version: 1
+updated: 2026-09-02
+currency_default: EUR
+
+opportunities:
+  - id: nlnet-2026-09
+    name: NLnet Foundation calls — September 2026
+    funder: NLnet Foundation
+    programme: NLnet open technology grants
+    status: opening
+    opens: 2026-09-03
+    deadline: 2026-11-03T12:00:00+01:00
+    geography: international
+    funding:
+      min: null
+      max: null
+      note: "Call-specific amount to be confirmed when calls reopen; prior NLnet/NGI Zero calls commonly used EUR 5k–50k ranges."
+    ec_role: direct_applicant
+    fit: 0.95
+    autonomy_value: 0.95
+    capture_risk: 0.05
+    admin_cost: 0.25
+    network_value: 0.65
+    recurrence: 0.80
+    priority: P0
+    next_action: "Select one concrete EC technical deliverable and prepare proposal after call-specific guides publish."
+    sources:
+      - https://nlnet.nl/propose/
+
+  - id: cost-open-call-2026
+    name: COST Open Call 2026
+    funder: COST Association
+    status: open
+    opens: 2026-07-31T12:00:00+02:00
+    deadline: 2026-10-28T12:00:00+01:00
+    geography: europe
+    funding:
+      note: "Network/action funding rather than conventional project R&D budget."
+    ec_role: proposer_or_network_participant
+    fit: 0.82
+    autonomy_value: 0.82
+    capture_risk: 0.05
+    admin_cost: 0.65
+    network_value: 1.00
+    recurrence: 0.65
+    priority: P1
+    next_action: "Assess feasibility of a Digital Commons Governance network and identify proposers across COST countries."
+    sources:
+      - https://www.cost.eu/funding/open-call-a-simple-one-step-application-process/
+
+  - id: msca-pf-2027
+    name: MSCA Postdoctoral Fellowships 2027
+    funder: European Commission
+    programme: Horizon Europe / MSCA
+    call_id: HORIZON-MSCA-2027-PF-01
+    status: forthcoming
+    opens: 2027-04-07
+    deadline: 2027-09-08T17:00:00+02:00
+    geography: horizon_europe
+    funding:
+      note: "Unit-contribution fellowship; exact EC project amount depends on duration, country coefficient and applicable allowances."
+    ec_role: host_beneficiary
+    fit: 0.93
+    autonomy_value: 0.85
+    capture_risk: 0.08
+    admin_cost: 0.65
+    network_value: 0.90
+    recurrence: 0.70
+    priority: P1
+    next_action: "Identify eligible postdoctoral researcher, supervision architecture and a research project aligned with EC."
+    sources:
+      - https://marie-sklodowska-curie-actions.ec.europa.eu/funding/msca-postdoctoral-fellowships-2027
+
+  - id: dc-edic-engagement
+    name: Digital Commons EDIC engagement
+    funder: null
+    programme: Digital Commons European Digital Infrastructure Consortium
+    status: strategic_network
+    geography: europe
+    funding:
+      note: "Not itself recorded here as a single grant call; strategic access point to funding pathways, incubation, legal/technical expertise and cross-border digital-commons projects."
+    ec_role: stakeholder_partner
+    fit: 1.00
+    autonomy_value: 0.95
+    capture_risk: 0.05
+    admin_cost: 0.20
+    network_value: 1.00
+    recurrence: 1.00
+    priority: P0
+    next_action: "Map contact/participation routes and prepare a concise EC institutional dossier for engagement."
+    sources:
+      - https://digital-strategy.ec.europa.eu/en/policies/edic
