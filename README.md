@@ -2,6 +2,8 @@
 
 Public funding intelligence and institutional-capacity repository for **Exergism Commons (EC)**.
 
+**Website:** https://funding.exergism.org
+
 EC does not optimise for the largest possible grant. It optimises for **durable autonomous capacity**: money, people, infrastructure, legitimacy, knowledge and networks, while minimising capture, dependency and administrative drag.
 
 ## Objectives
@@ -37,6 +39,7 @@ No single category should become synonymous with EC's survival.
 - `partnerships/` — strategic networks and institutions relevant to funding and expansion.
 - `proposals/` — proposal work products when appropriate for public development.
 - `data/` — machine-readable opportunity registry.
+- `docs/` — static public dashboard served at `funding.exergism.org`.
 
 ## Evaluation principle
 
