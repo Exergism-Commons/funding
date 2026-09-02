@@ -71,6 +71,14 @@ derived RDF
 GitHub Actions enforcement
 ```
 
+Persistent public identifiers are issued through the shared Exergism Commons identifier authority:
+
+- vocabulary: `https://id.exergism.org/funding#`
+- ontology: `https://id.exergism.org/ontology/funding`
+- governance records: `https://id.exergism.org/funding/id/{stableId}`
+
+The repository remains authoritative for funding semantics and governance history. `id.exergism.org` makes identities persistent and dereferenceable across repository, hosting and deployment changes.
+
 Current machine-checkable invariants include:
 
 - rank-eligible opportunities require all ten EIV dimensions explicitly in `[0,1]`;
