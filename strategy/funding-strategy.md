@@ -14,7 +14,8 @@ Funding is valuable when it increases one or more of the following without dispr
 - scientific and institutional legitimacy;
 - access to networks, consortia and public institutions;
 - recurring revenue;
-- strategic reserves.
+- strategic reserves;
+- permanent institutional capital.
 
 ## Portfolio principle
 
@@ -28,7 +29,22 @@ EC should maintain a deliberately heterogeneous portfolio. A healthy mature mix 
 6. **Institutional sponsorship/membership** — preferably recurring and non-governing.
 7. **Community funding** — donations and recurring small sponsorships.
 8. **Earned income** — contracts, training, audits, support and other mission-aligned services.
-9. **Reserves/endowment-like assets** — long-term financial resilience, subject to EC governance and applicable law.
+9. **Strategic reserves** — liquid capital that gives EC time and refusal capacity.
+10. **EC Endowment** — institutionally owned long-duration capital intended to compound and finance future mission expenditure.
+
+## From fundraising to capital formation
+
+EC should not remain permanently dependent on the cycle:
+
+**apply -> receive grant -> spend -> return to zero -> apply again.**
+
+A mature financial architecture should progressively convert part of unrestricted success into capital that survives individual funding cycles:
+
+**fundraising + earned income + unrestricted surplus -> reserves -> Endowment -> recurring autonomous capacity.**
+
+External funding should increasingly become an accelerator of EC's work rather than the condition for EC's continued existence.
+
+See `endowment-policy.md` and `treasury-strategy.md`.
 
 ## Institutional value model
 
@@ -47,6 +63,8 @@ Grant size alone is a poor ranking function. Each opportunity should be evaluate
 
 A future scoring tool may compute an **Expected Institutional Value (EIV)** instead of ranking calls by headline budget.
 
+A further question should be asked of unrestricted opportunities: **does this funding merely increase current expenditure, or can part of the resulting surplus become durable EC-owned capital?**
+
 ## Phased strategy
 
 ### Phase 0 — Formation
@@ -58,7 +76,8 @@ Targets:
 - document governance and financial controls;
 - create public funding intelligence;
 - secure first small independent grants;
-- begin recurring community/sponsor revenue.
+- begin recurring community/sponsor revenue;
+- define the legal/accounting path for reserves and an eventual Endowment.
 
 ### Phase 1 — First financed capacity
 
@@ -73,6 +92,8 @@ Preferred structure:
 
 Goal: finance real contributor time without making survival dependent on one programme.
 
+Capital objective: establish minimum operating liquidity and begin building the Strategic Reserve before treating long-term investment as a priority.
+
 ### Phase 2 — Research organisation
 
 Indicative annual scale: **EUR 150k–400k**.
@@ -83,9 +104,10 @@ Possible components:
 - Horizon beneficiary work package;
 - open-source foundation grants;
 - contracts/sponsorship;
-- growing unrestricted reserve.
+- growing unrestricted reserve;
+- first systematic allocations of unrestricted surplus to the EC Endowment when liquidity permits.
 
-Goal: sustain 1–3 paid people and durable research/technical operations.
+Goal: sustain 1–3 paid people and durable research/technical operations while beginning permanent capital formation.
 
 ### Phase 3 — Independent institution
 
@@ -96,9 +118,27 @@ Goals:
 - 6+ meaningful funding sources/categories;
 - 6–12 months operating reserve;
 - meaningful unrestricted/core revenue;
+- a growing EC Endowment with a documented spending rule;
 - ability to reject misaligned grants;
 - ability to issue microgrants/fellowships or otherwise fund external contributors;
-- capacity to lead work packages and eventually coordinate selected programmes.
+- capacity to lead work packages and eventually coordinate selected programmes;
+- a measurable share of core activity financed from EC-owned capital rather than external permission.
+
+## Compensation and professionalisation
+
+EC's ability to pay people is a feature, not a contradiction of its non-profit mission, provided compensation is for genuine work and is structured under applicable law and governance.
+
+The financial architecture must preserve the distinction:
+
+**work -> compensation**
+
+not
+
+**membership -> economic distribution.**
+
+Equal or compressed salary structures may be adopted as a governance choice, but membership must not create a claim over annual surplus, reserves or Endowment returns.
+
+See `compensation-principles.md`.
 
 ## Networking as capital
 
@@ -122,3 +162,5 @@ For some opportunities, network value may exceed the immediate grant amount.
 **Funding must adapt to EC. EC must not be reshaped merely to fit funding.**
 
 A call that requires EC to abandon its mission, surrender IP/governance control, manufacture irrelevant deliverables, or become structurally dependent should be rejected even if financially attractive.
+
+The long-run objective is stronger than diversification alone: **EC should progressively own enough productive capital that external funding becomes optional for an increasing share of its core work.**
