@@ -88,10 +88,58 @@ Represents a proposal/decision concerning acceptance of material funding. Initia
 - no EC-wide IP ownership may be granted to the funder;
 - no exclusive right over core EC infrastructure may be granted;
 - post-award single-funder concentration must be explicit;
+- institutional phase and dependency state must be explicit;
 - concentration above 30% requires an explicit `DiversificationPlan`;
 - concentration above 50% requires `qualified` approval.
 
 The thresholds encode the current anti-capture policy. Changing them is a governance change and should be reviewed as such.
+
+### Funding phase and dependency states
+
+Institutional maturity and funding dependency are **two separate semantic axes**.
+
+Funding phase:
+
+- `BootstrapState` — EC is in an explicitly temporary early financing phase;
+- `NormalState` — EC is no longer relying on the bootstrap designation.
+
+Dependency state:
+
+- `DiversifiedState` — single-funder concentration is `<= 30%`;
+- `ElevatedConcentrationState` — concentration is `> 30%` and `<= 50%`;
+- `StrategicDependencyState` — concentration is `> 50%`.
+
+This separation is deliberate. EC can simultaneously be:
+
+```text
+BootstrapState
++
+StrategicDependencyState
+```
+
+For example, the first material grant can represent 100% of recorded funding. That state is not automatically forbidden. A 100% bootstrap decision can conform when:
+
+- the dependency is explicitly represented as `StrategicDependencyState`;
+- a `DiversificationPlan` exists;
+- approval is `qualified`;
+- no governance/IP/core-infrastructure control is granted to the funder; and
+- the bootstrap/dependency state has an explicit review date.
+
+Thus the machine policy distinguishes:
+
+```text
+dependency detected != funding prohibited
+```
+
+from:
+
+```text
+dependency hidden or unmanaged = governance-integrity failure
+```
+
+SHACL checks that the asserted dependency-state class matches the numeric concentration. A 100% decision cannot claim `DiversifiedState` merely because EC is in bootstrap.
+
+The ontology does **not** infer a state individual from a percentage. The state remains an explicit, reviewable governance record; SHACL checks consistency between that record and the quantitative input.
 
 ### CompensationDecision
 
@@ -155,6 +203,8 @@ Git history preserves provenance
 
 A decision record should not be rewritten to erase a prior material outcome. Use `supersedes` for later records when the institutional state changes materially.
 
+Institutional funding-state records are also time-bounded review artifacts. `BootstrapState`, in particular, must have a `reviewDue`; it must not silently persist forever because EC was once young or small.
+
 ## 7. What should become machine-readable next
 
 The v0.1 profile is intentionally narrow. Candidate next layers are:
@@ -167,7 +217,8 @@ The v0.1 profile is intentionally narrow. Candidate next layers are:
 6. conflicts/recusals and quorum/majority profiles sourced from `governance`;
 7. immutable governance snapshots binding policy versions to decisions;
 8. SPARQL dependency checks showing which decisions become stale when a policy or funding condition changes;
-9. projection of persistent identifiers through `id.exergism.org`.
+9. formal bootstrap exit criteria once EC has enough financial history to calibrate them;
+10. projection of persistent identifiers through `id.exergism.org`.
 
 ## 8. Cross-repository governance
 
