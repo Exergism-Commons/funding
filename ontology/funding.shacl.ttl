@@ -17,6 +17,16 @@ ecf:GovernanceRecordShape a sh:NodeShape ;
         sh:path ecf:provenance ;
         sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1
     ] ;
+    # RDFS inference does not enforce owl:AllDisjointClasses. Require every
+    # GovernanceRecord to belong to exactly one top-level record category.
+    sh:xone (
+        [ sh:class ecf:FundingOpportunity ]
+        [ sh:class ecf:GovernanceDecision ]
+        [ sh:class ecf:Vote ]
+        [ sh:class ecf:ConflictDisclosure ]
+        [ sh:class ecf:DiversificationPlan ]
+        [ sh:class ecf:InstitutionalFundingState ]
+    ) ;
     sh:sparql [
         a sh:SPARQLConstraint ;
         sh:message "Canonical governance-record IRIs must equal https://id.exergism.org/funding/id/{stableId}." ;
@@ -82,13 +92,21 @@ ecf:DiversificationPlanShape a sh:NodeShape ;
     sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
     sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
 
-# Institutional maturity and dependency are deliberately separate axes. A new
-# EC can therefore be in BootstrapState and StrategicDependencyState at once.
+# Institutional maturity and dependency are separate axes, but each state
+# individual represents exactly one concrete state. This mirrors OWL
+# disjointness in the SHACL profile used under RDFS inference.
 ecf:InstitutionalFundingStateShape a sh:NodeShape ;
     sh:targetClass ecf:InstitutionalFundingState ;
     sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
     sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
-    sh:property [ sh:path ecf:reviewDue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] .
+    sh:property [ sh:path ecf:reviewDue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ;
+    sh:xone (
+        [ sh:class ecf:BootstrapState ]
+        [ sh:class ecf:NormalState ]
+        [ sh:class ecf:DiversifiedState ]
+        [ sh:class ecf:ElevatedConcentrationState ]
+        [ sh:class ecf:StrategicDependencyState ]
+    ) .
 
 ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
     sh:targetClass ecf:FundingAcceptanceDecision ;
@@ -99,6 +117,17 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
     sh:property [ sh:path ecf:singleFunderConcentrationAfter ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
     sh:property [ sh:path ecf:institutionalPhase ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:FundingPhaseState ] ;
     sh:property [ sh:path ecf:dependencyState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:FundingDependencyState ] ;
+    # Range inference alone is insufficient: require one concrete phase and
+    # one concrete dependency class, and reject multiply-classified states.
+    sh:xone (
+        [ sh:property [ sh:path ecf:institutionalPhase ; sh:class ecf:BootstrapState ] ]
+        [ sh:property [ sh:path ecf:institutionalPhase ; sh:class ecf:NormalState ] ]
+    ) ;
+    sh:xone (
+        [ sh:property [ sh:path ecf:dependencyState ; sh:class ecf:DiversifiedState ] ]
+        [ sh:property [ sh:path ecf:dependencyState ; sh:class ecf:ElevatedConcentrationState ] ]
+        [ sh:property [ sh:path ecf:dependencyState ; sh:class ecf:StrategicDependencyState ] ]
+    ) ;
     sh:property [ sh:path ecf:governanceRightGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
     sh:property [ sh:path ecf:ecWideIpOwnershipGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
     sh:property [ sh:path ecf:exclusiveCoreInfrastructureRightGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
