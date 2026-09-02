@@ -6,6 +6,16 @@
 # SHACL defines repository/governance-record validity. It does not execute
 # payments, accept grants, set salaries or replace the competent EC body.
 
+ecf:CanonicalRecordIdentityConstraint a sh:SPARQLConstraint ;
+    sh:message "Canonical governance-record IRIs must equal https://id.exergism.org/funding/id/{stableId}." ;
+    sh:select """
+        PREFIX ecf: <https://id.exergism.org/funding#>
+        SELECT $this WHERE {
+          $this ecf:stableId ?id .
+          FILTER (STR($this) != CONCAT("https://id.exergism.org/funding/id/", STR(?id)))
+        }
+    """ .
+
 ecf:GovernanceRecordShape a sh:NodeShape ;
     sh:targetClass ecf:GovernanceRecord ;
     sh:property [
@@ -27,18 +37,10 @@ ecf:GovernanceRecordShape a sh:NodeShape ;
         [ sh:class ecf:DiversificationPlan ]
         [ sh:class ecf:InstitutionalFundingState ]
     ) ;
-    sh:sparql [
-        a sh:SPARQLConstraint ;
-        sh:message "Canonical governance-record IRIs must equal https://id.exergism.org/funding/id/{stableId}." ;
-        sh:select """
-            PREFIX ecf: <https://id.exergism.org/funding#>
-            SELECT $this WHERE {
-              $this ecf:stableId ?id ; ecf:provenance ?provenance .
-              FILTER (!STRSTARTS(STR(?provenance), "tests/fixtures/"))
-              FILTER (STR($this) != CONCAT("https://id.exergism.org/funding/id/", STR(?id)))
-            }
-        """
-    ] .
+    # This canonical identity constraint is always active in the published
+    # profile. Tests that use non-public fixture IRIs explicitly remove this
+    # one constraint from an in-memory copy of the shapes graph.
+    sh:sparql ecf:CanonicalRecordIdentityConstraint .
 
 ecf:GovernanceDecisionShape a sh:NodeShape ;
     sh:targetClass ecf:GovernanceDecision ;
