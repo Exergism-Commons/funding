@@ -6,7 +6,13 @@ This directory implements the semantic layer for Exergism Commons funding govern
 - `funding-context.jsonld` — JSON-LD context for Git-native governance records.
 - `funding.shacl.ttl` — closed repository/policy validity constraints.
 
-Namespace: `urn:ecf:`.
+Persistent identifiers:
+
+- vocabulary namespace: `https://id.exergism.org/funding#`
+- ontology IRI: `https://id.exergism.org/ontology/funding`
+- canonical governance records: `https://id.exergism.org/funding/id/{stableId}`
+
+These identifiers are issued under the shared Exergism Commons identifier authority. The funding repository remains authoritative for funding semantics; `id.exergism.org` provides persistence and dereferencing rather than becoming a second semantic source.
 
 ## Reasoning boundary
 
