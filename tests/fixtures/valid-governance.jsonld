@@ -1,0 +1,119 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf:ECF-STATE-PHASE-NORMAL-VALID-001",
+      "@type": "NormalState",
+      "id": "ECF-STATE-PHASE-NORMAL-VALID-001",
+      "title": "Normal institutional funding phase",
+      "rationale": "Illustrative non-bootstrap phase for a diversified funding decision.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-STATE-DEPENDENCY-DIVERSIFIED-VALID-001",
+      "@type": "DiversifiedState",
+      "id": "ECF-STATE-DEPENDENCY-DIVERSIFIED-VALID-001",
+      "title": "Diversified funding state",
+      "rationale": "Single-funder concentration is at or below the 30 percent target.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-OPP-VALID-001",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-VALID-001",
+      "title": "Valid illustrative funding opportunity",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-ACCEPT-VALID-001",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-ACCEPT-VALID-001",
+      "title": "Accept illustrative diversified funding",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "ordinary",
+      "rationale": "Fixture demonstrating an acceptance decision below concentration safeguards with no governance or EC-wide IP rights granted.",
+      "opportunity": "urn:ecf:ECF-OPP-VALID-001",
+      "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-NORMAL-VALID-001",
+      "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-DIVERSIFIED-VALID-001",
+      "amount": "25000",
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": "0.25",
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
+      "@id": "urn:ecf:PERSON-ALICE",
+      "@type": "Person"
+    },
+    {
+      "@id": "urn:ecf:PERSON-BOB",
+      "@type": "Person"
+    },
+    {
+      "@id": "urn:ecf:ECF-CONFLICT-COMP-VALID-001",
+      "@type": "ConflictDisclosure",
+      "id": "ECF-CONFLICT-COMP-VALID-001",
+      "interestedParty": "urn:ecf:PERSON-ALICE",
+      "rationale": "Alice is the compensation beneficiary and therefore has a direct financial conflict.",
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-VOTE-COMP-VALID-ALICE",
+      "@type": "Vote",
+      "id": "ECF-VOTE-COMP-VALID-ALICE",
+      "voter": "urn:ecf:PERSON-ALICE",
+      "voteValue": "abstain",
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-VOTE-COMP-VALID-BOB",
+      "@type": "Vote",
+      "id": "ECF-VOTE-COMP-VALID-BOB",
+      "voter": "urn:ecf:PERSON-BOB",
+      "voteValue": "approve",
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-COMP-VALID-001",
+      "@type": "CompensationDecision",
+      "id": "ECF-DEC-COMP-VALID-001",
+      "title": "Approve compensation for defined work",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "ordinary",
+      "rationale": "Fixture demonstrating compensation tied to real work with conflict disclosure and beneficiary abstention.",
+      "beneficiary": "urn:ecf:PERSON-ALICE",
+      "workBasis": "0.5 FTE software and research work",
+      "compensationAmount": "20000",
+      "currency": "EUR",
+      "conflictDisclosure": "urn:ecf:ECF-CONFLICT-COMP-VALID-001",
+      "hasVote": [
+        "urn:ecf:ECF-VOTE-COMP-VALID-ALICE",
+        "urn:ecf:ECF-VOTE-COMP-VALID-BOB"
+      ],
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-ENDOWMENT-VALID-001",
+      "@type": "EndowmentPrincipalWithdrawalDecision",
+      "id": "ECF-DEC-ENDOWMENT-VALID-001",
+      "title": "Exceptional Endowment principal withdrawal",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "qualified",
+      "rationale": "Fixture demonstrating the enhanced safeguards required before principal can be consumed.",
+      "principalWithdrawalAmount": "10000",
+      "currency": "EUR",
+      "exceptionalCondition": true,
+      "endowmentPurpose": "Documented institutional emergency",
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    }
+  ]
+}

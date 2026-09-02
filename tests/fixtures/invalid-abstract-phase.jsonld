@@ -1,0 +1,52 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf-test:ECF-STATE-PHASE-ABSTRACT",
+      "@type": "FundingPhaseState",
+      "id": "ECF-STATE-PHASE-ABSTRACT",
+      "title": "Abstract-only funding phase",
+      "rationale": "Deliberately invalid: a decision must identify BootstrapState or NormalState, not only the abstract phase superclass.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/invalid-abstract-phase.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-STATE-DEPENDENCY-DIVERSIFIED-ABSTRACT-PHASE",
+      "@type": "DiversifiedState",
+      "id": "ECF-STATE-DEPENDENCY-DIVERSIFIED-ABSTRACT-PHASE",
+      "title": "Diversified funding state",
+      "rationale": "Dependency classification is valid so the fixture isolates the abstract phase error.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/invalid-abstract-phase.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-OPP-ABSTRACT-PHASE",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-ABSTRACT-PHASE",
+      "title": "Abstract phase fixture opportunity",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/invalid-abstract-phase.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-DEC-ABSTRACT-PHASE",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-ABSTRACT-PHASE",
+      "title": "Invalid decision with abstract institutional phase",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "ordinary",
+      "rationale": "Deliberately invalid abstract phase fixture.",
+      "opportunity": "urn:ecf-test:ECF-OPP-ABSTRACT-PHASE",
+      "institutionalPhase": "urn:ecf-test:ECF-STATE-PHASE-ABSTRACT",
+      "dependencyState": "urn:ecf-test:ECF-STATE-DEPENDENCY-DIVERSIFIED-ABSTRACT-PHASE",
+      "amount": 10000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 0.20,
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "provenance": "tests/fixtures/invalid-abstract-phase.jsonld"
+    }
+  ]
+}

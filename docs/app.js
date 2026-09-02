@@ -137,6 +137,63 @@ async function loadData() {
   }
 }
 
+function injectMachineGovernance() {
+  if (document.querySelector('#machine-governance')) return;
+
+  const independence = document.querySelector('#independence');
+  if (independence) {
+    independence.insertAdjacentHTML('afterend', `
+      <section class="section" id="machine-governance">
+        <div class="shell">
+          <div class="section-heading">
+            <p class="eyebrow">03 · Executable governance</p>
+            <h2>Policy that can be inspected by machines.</h2>
+            <p>Funding governance is represented as an auditable semantic stack. Code validates explicit institutional state; it does not replace the competent EC body, statutes or applicable law.</p>
+          </div>
+
+          <div class="principles-grid">
+            <article class="principle-card">
+              <span class="principle-index">OWL</span>
+              <h3>Domain semantics</h3>
+              <p>Funding opportunities, decisions, conflicts, votes, compensation and Endowment actions have explicit classes and properties without hidden approval inference.</p>
+            </article>
+            <article class="principle-card">
+              <span class="principle-index">JSON-LD</span>
+              <h3>Git-native state</h3>
+              <p>Concrete governance records remain diffable, versioned and attributable in Git instead of disappearing inside a private database.</p>
+            </article>
+            <article class="principle-card">
+              <span class="principle-index">SHACL</span>
+              <h3>Machine-checkable safeguards</h3>
+              <p>Anti-capture, concentration, conflict-of-interest, EIV completeness and Endowment-principal invariants are validated as repository constraints.</p>
+            </article>
+            <article class="principle-card">
+              <span class="principle-index">RDF</span>
+              <h3>Rebuildable audit graph</h3>
+              <p>The live opportunity registry and governance records compile into disposable RDF that can be rebuilt deterministically from canonical repository sources.</p>
+            </article>
+          </div>
+
+          <div class="hero-actions">
+            <a class="button button-primary" href="https://github.com/Exergism-Commons/funding/blob/main/spec/MACHINE-READABLE-GOVERNANCE.md">Read the governance specification</a>
+            <a class="button button-secondary" href="https://github.com/Exergism-Commons/funding/tree/main/ontology">Inspect ontology &amp; SHACL</a>
+            <a class="button button-secondary" href="https://github.com/Exergism-Commons/funding/tree/main/knowledge">Inspect governance records</a>
+          </div>
+        </div>
+      </section>`);
+  }
+
+  const nav = document.querySelector('#primary-nav');
+  if (nav && !nav.querySelector('a[href="#machine-governance"]')) {
+    const commonsLink = [...nav.querySelectorAll('a')].find(link => link.href === 'https://www.exergism.org/');
+    const governanceLink = document.createElement('a');
+    governanceLink.href = '#machine-governance';
+    governanceLink.textContent = 'Governance';
+    if (commonsLink) nav.insertBefore(governanceLink, commonsLink);
+    else nav.appendChild(governanceLink);
+  }
+}
+
 function bindFilters() {
   document.querySelectorAll('.filter').forEach(button => {
     button.addEventListener('click', () => {
@@ -167,6 +224,7 @@ function bindNavigation() {
   }));
 }
 
+injectMachineGovernance();
 bindFilters();
 bindNavigation();
 loadData();

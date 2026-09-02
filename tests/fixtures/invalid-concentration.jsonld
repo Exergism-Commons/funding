@@ -1,0 +1,52 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf:ECF-STATE-PHASE-NORMAL-INVALID-CONCENTRATION",
+      "@type": "NormalState",
+      "id": "ECF-STATE-PHASE-NORMAL-INVALID-CONCENTRATION",
+      "title": "Normal institutional funding phase",
+      "rationale": "Illustrative non-bootstrap phase.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/invalid-concentration.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-STATE-DEPENDENCY-ELEVATED-INVALID-CONCENTRATION",
+      "@type": "ElevatedConcentrationState",
+      "id": "ECF-STATE-DEPENDENCY-ELEVATED-INVALID-CONCENTRATION",
+      "title": "Elevated funding concentration",
+      "rationale": "The numeric concentration is correctly classified, so this fixture isolates the absent diversification plan.",
+      "reviewDue": "2027-03-02",
+      "provenance": "tests/fixtures/invalid-concentration.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-OPP-INVALID-CONCENTRATION",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-INVALID-CONCENTRATION",
+      "title": "Concentration fixture",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/invalid-concentration.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-INVALID-CONCENTRATION",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-INVALID-CONCENTRATION",
+      "title": "Invalid concentrated funding without diversification plan",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "ordinary",
+      "rationale": "Deliberately invalid fixture.",
+      "opportunity": "urn:ecf:ECF-OPP-INVALID-CONCENTRATION",
+      "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-NORMAL-INVALID-CONCENTRATION",
+      "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-ELEVATED-INVALID-CONCENTRATION",
+      "amount": 50000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 0.35,
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "provenance": "tests/fixtures/invalid-concentration.jsonld"
+    }
+  ]
+}

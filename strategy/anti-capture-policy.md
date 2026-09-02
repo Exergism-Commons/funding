@@ -38,7 +38,38 @@ Long-term target:
 - concentration above 30% triggers a diversification plan;
 - concentration above 50% is treated as a strategic dependency even if formally temporary.
 
-These are governance targets, not retroactive prohibitions for the organisation's earliest financing stage.
+These thresholds diagnose dependency and determine governance safeguards. They are **not automatic prohibitions on accepting funding**.
+
+### Bootstrap treatment
+
+EC may begin with one material funder. In that case the funder can temporarily represent **100% of recorded funding** without making the acceptance intrinsically invalid.
+
+Bootstrap does not hide or waive dependency. A materially concentrated bootstrap decision must:
+
+1. explicitly identify EC as being in a `BootstrapState`;
+2. classify concentration above 50% as a `StrategicDependencyState`;
+3. include a documented diversification plan when concentration exceeds 30%;
+4. use qualified approval when concentration exceeds 50%;
+5. preserve the no-governance-for-money and IP/infrastructure firewalls; and
+6. carry a review date so bootstrap status cannot become an indefinite unreviewed exception.
+
+The key distinction is:
+
+> **dependency detected ≠ funding prohibited**
+
+but:
+
+> **dependency hidden or unmanaged = governance defect**
+
+Institutional maturity and funding dependency are separate axes. EC can therefore be simultaneously in `BootstrapState` and `StrategicDependencyState`.
+
+The machine-readable profile uses these dependency classes:
+
+- `DiversifiedState` — single-funder concentration at or below 30%;
+- `ElevatedConcentrationState` — concentration above 30% and at or below 50%;
+- `StrategicDependencyState` — concentration above 50%.
+
+A future governance revision may replace or refine the bootstrap exit criteria. The current profile deliberately records bootstrap explicitly instead of inferring a permanent exception from age, revenue or founder status.
 
 ## 4. Unrestricted/core revenue
 
@@ -159,7 +190,28 @@ Funding relationships should be designed so EC can terminate or decline renewal 
 - unrestricted reserves;
 - EC Endowment capital.
 
-## 12. Strategic principle
+## 12. Machine-readable enforcement profile
+
+A reviewable subset of this policy is represented in `ontology/funding.shacl.ttl` and validated against Git-native governance records and the live opportunity registry.
+
+The executable profile currently enforces, among other invariants:
+
+- no governance-for-money flag on funding acceptance records;
+- no EC-wide IP ownership transfer to a funder;
+- no exclusive funder control of core EC infrastructure;
+- an explicit institutional phase and funding-dependency state for funding acceptance records;
+- dependency-state classification consistent with the numeric concentration value;
+- diversification planning above the 30% concentration threshold;
+- qualified approval above the 50% strategic-dependency threshold;
+- compensation conflict disclosure and beneficiary abstention;
+- enhanced safeguards for Endowment principal withdrawal;
+- prohibition of a membership-based distributable economic share.
+
+The human policy remains the governance authority. SHACL is a machine-checkable projection of part of that authority, not an independent constitution. A divergence between policy and shapes is itself a review defect and must be resolved explicitly.
+
+See `spec/MACHINE-READABLE-GOVERNANCE.md`.
+
+## 13. Strategic principle
 
 **The correct measure of funding quality is not how much control EC gains over money, but how much durable freedom EC gains after accepting it.**
 

@@ -1,0 +1,53 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf-test:ECF-STATE-PHASE-BOOTSTRAP-REUSED-PLAN",
+      "@type": "BootstrapState",
+      "id": "ECF-STATE-PHASE-BOOTSTRAP-REUSED-PLAN",
+      "title": "Bootstrap phase",
+      "rationale": "Valid bootstrap phase for the adversarial fixture.",
+      "reviewDue": "2027-03-02",
+      "provenance": "tests/fixtures/invalid-reused-state-as-plan.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-STATE-DEPENDENCY-STRATEGIC-REUSED-PLAN",
+      "@type": "StrategicDependencyState",
+      "id": "ECF-STATE-DEPENDENCY-STRATEGIC-REUSED-PLAN",
+      "title": "Strategic dependency incorrectly reused as a plan",
+      "rationale": "Deliberately invalid: this state individual is also referenced through diversificationPlan.",
+      "reviewDue": "2026-12-02",
+      "provenance": "tests/fixtures/invalid-reused-state-as-plan.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-OPP-REUSED-PLAN",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-REUSED-PLAN",
+      "title": "State-as-plan fixture opportunity",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/invalid-reused-state-as-plan.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-DEC-REUSED-PLAN",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-REUSED-PLAN",
+      "title": "Invalid decision reusing dependency state as diversification plan",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "qualified",
+      "rationale": "Deliberately invalid category reuse fixture.",
+      "opportunity": "urn:ecf-test:ECF-OPP-REUSED-PLAN",
+      "institutionalPhase": "urn:ecf-test:ECF-STATE-PHASE-BOOTSTRAP-REUSED-PLAN",
+      "dependencyState": "urn:ecf-test:ECF-STATE-DEPENDENCY-STRATEGIC-REUSED-PLAN",
+      "diversificationPlan": "urn:ecf-test:ECF-STATE-DEPENDENCY-STRATEGIC-REUSED-PLAN",
+      "amount": 50000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 1.0,
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "provenance": "tests/fixtures/invalid-reused-state-as-plan.jsonld"
+    }
+  ]
+}

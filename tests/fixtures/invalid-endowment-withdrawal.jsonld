@@ -1,0 +1,16 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@id": "urn:ecf:ECF-DEC-INVALID-ENDOWMENT",
+  "@type": "EndowmentPrincipalWithdrawalDecision",
+  "id": "ECF-DEC-INVALID-ENDOWMENT",
+  "title": "Invalid ordinary Endowment principal withdrawal",
+  "status": "proposed",
+  "decisionDate": "2026-09-02",
+  "approvalClass": "ordinary",
+  "rationale": "Deliberately invalid fixture.",
+  "principalWithdrawalAmount": 10000,
+  "currency": "EUR",
+  "exceptionalCondition": false,
+  "endowmentPurpose": "Ordinary operating expenditure",
+  "provenance": "tests/fixtures/invalid-endowment-withdrawal.jsonld"
+}

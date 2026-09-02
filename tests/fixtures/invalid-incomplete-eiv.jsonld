@@ -1,0 +1,12 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@id": "urn:ecf:ECF-OPP-INVALID-EIV",
+  "@type": "FundingOpportunity",
+  "id": "ECF-OPP-INVALID-EIV",
+  "title": "Invalid rank-eligible opportunity with missing EIV dimensions",
+  "rankEligible": true,
+  "fit": 0.8,
+  "fundingValue": 0.7,
+  "captureRisk": 0.2,
+  "provenance": "tests/fixtures/invalid-incomplete-eiv.jsonld"
+}

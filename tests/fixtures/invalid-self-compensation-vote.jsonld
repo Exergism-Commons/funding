@@ -1,0 +1,42 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf:PERSON-BENEFICIARY",
+      "@type": "Person"
+    },
+    {
+      "@id": "urn:ecf:ECF-CONFLICT-INVALID-COMP",
+      "@type": "ConflictDisclosure",
+      "id": "ECF-CONFLICT-INVALID-COMP",
+      "interestedParty": "urn:ecf:PERSON-BENEFICIARY",
+      "rationale": "Beneficiary has a direct financial interest.",
+      "provenance": "tests/fixtures/invalid-self-compensation-vote.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-VOTE-INVALID-COMP",
+      "@type": "Vote",
+      "id": "ECF-VOTE-INVALID-COMP",
+      "voter": "urn:ecf:PERSON-BENEFICIARY",
+      "voteValue": "approve",
+      "provenance": "tests/fixtures/invalid-self-compensation-vote.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-INVALID-COMP",
+      "@type": "CompensationDecision",
+      "id": "ECF-DEC-INVALID-COMP",
+      "title": "Invalid self-approved compensation",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "ordinary",
+      "rationale": "Deliberately invalid fixture.",
+      "beneficiary": "urn:ecf:PERSON-BENEFICIARY",
+      "workBasis": "Defined technical work",
+      "compensationAmount": 20000,
+      "currency": "EUR",
+      "conflictDisclosure": "urn:ecf:ECF-CONFLICT-INVALID-COMP",
+      "hasVote": ["urn:ecf:ECF-VOTE-INVALID-COMP"],
+      "provenance": "tests/fixtures/invalid-self-compensation-vote.jsonld"
+    }
+  ]
+}

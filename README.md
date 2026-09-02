@@ -15,6 +15,7 @@ EC does not optimise for the largest possible grant. It optimises for **durable 
 5. Keep funding conditions and conflicts transparent.
 6. Prevent any funder from obtaining governance, roadmap or IP control over EC.
 7. Build an **EC Endowment** so that a growing share of future activity can be financed from capital EC already owns and controls.
+8. Make material funding governance increasingly **machine-readable, auditable and reproducible**.
 
 ## Portfolio model
 
@@ -52,6 +53,47 @@ See:
 - `strategy/compensation-principles.md`
 - `strategy/anti-capture-policy.md`
 
+## Machine-readable governance
+
+Funding is now also implemented as a semantic governance domain rather than only a collection of prose policies.
+
+```text
+policies / EC governance
+        ↓
+OWL TBox
+        ↓
+JSON-LD governance records + live opportunity registry
+        ↓
+SHACL policy/integrity constraints
+        ↓
+derived RDF
+        ↓
+GitHub Actions enforcement
+```
+
+Persistent public identifiers are issued through the shared Exergism Commons identifier authority:
+
+- vocabulary: `https://id.exergism.org/funding#`
+- ontology: `https://id.exergism.org/ontology/funding`
+- governance records: `https://id.exergism.org/funding/id/{stableId}`
+
+The repository remains authoritative for funding semantics and governance history. `id.exergism.org` makes identities persistent and dereferenceable across repository, hosting and deployment changes.
+
+Current machine-checkable invariants include:
+
+- rank-eligible opportunities require all ten EIV dimensions explicitly in `[0,1]`;
+- funding cannot grant governance rights merely in exchange for money;
+- funding cannot grant EC-wide IP ownership or exclusive control of core infrastructure;
+- post-award single-funder concentration above 30% requires a diversification plan;
+- concentration above 50% requires qualified approval;
+- a compensation beneficiary cannot cast a substantive vote on their own compensation;
+- Endowment principal withdrawal requires an exceptional condition and qualified approval;
+- membership cannot be represented as a distributable economic share in EC.
+
+The machine layer does **not** replace institutional authority. Human governance/policy remains authoritative; SHACL implements a reviewable subset of those rules. If prose policy and executable constraints diverge, the divergence must be resolved explicitly rather than silently treating code as supreme.
+
+See `spec/MACHINE-READABLE-GOVERNANCE.md`.
+
 ## Repository structure
 
 - `strategy/` — portfolio design, independence, treasury, Endowment and compensation principles.
@@ -59,7 +101,12 @@ See:
 - `programmes/` — persistent knowledge about recurring funding programmes.
 - `partnerships/` — strategic networks and institutions relevant to funding and expansion.
 - `proposals/` — proposal work products when appropriate for public development.
-- `data/` — machine-readable opportunity registry.
+- `data/` — canonical structured opportunity registry.
+- `knowledge/` — canonical Git-native JSON-LD governance records.
+- `ontology/` — OWL TBox, JSON-LD context and SHACL constraints.
+- `spec/` — machine-readable governance/data specifications.
+- `tools/` — deterministic graph builders and integrity tooling.
+- `tests/` — positive and adversarial governance fixtures.
 - `docs/` — static public dashboard served at `funding.exergism.org`.
 
 ## Evaluation principle
@@ -87,6 +134,7 @@ See `strategy/funding-strategy.md` and `strategy/anti-capture-policy.md` for the
 5. COST Open Call 2026 — assess a European network around digital commons governance.
 6. Build recurring unrestricted funding through sponsorship, membership, donations and mission-aligned services.
 7. Build the legal, accounting and governance foundations required for an eventual EC Endowment.
+8. Expand the machine-readable governance profile from validation into versioned decision, concentration, treasury and Endowment audit trails.
 
 ## Status
 
