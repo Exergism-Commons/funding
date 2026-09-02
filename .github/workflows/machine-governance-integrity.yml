@@ -3,20 +3,24 @@ name: Machine-readable funding governance
 on:
   push:
     paths:
+      - "data/opportunities.yaml"
       - "knowledge/**"
       - "ontology/**"
       - "spec/MACHINE-READABLE-GOVERNANCE.md"
       - "strategy/**"
       - "requirements-ontology.txt"
+      - "tools/build_governance_graph.py"
       - "tests/**"
       - ".github/workflows/machine-governance-integrity.yml"
   pull_request:
     paths:
+      - "data/opportunities.yaml"
       - "knowledge/**"
       - "ontology/**"
       - "spec/MACHINE-READABLE-GOVERNANCE.md"
       - "strategy/**"
       - "requirements-ontology.txt"
+      - "tools/build_governance_graph.py"
       - "tests/**"
       - ".github/workflows/machine-governance-integrity.yml"
 
@@ -62,3 +66,16 @@ jobs:
               graph.parse(path, format='json-ld')
           print(f'parsed {len(records)} canonical JSON-LD records into {len(graph)} triples')
           PY
+
+      - name: Build derived governance graph twice
+        run: |
+          python tools/build_governance_graph.py --output-dir build-a
+          python tools/build_governance_graph.py --output-dir build-b
+
+      - name: Assert deterministic derived graph
+        run: |
+          cmp build-a/funding-governance.nt build-b/funding-governance.nt
+          cmp build-a/funding-governance-build.json build-b/funding-governance-build.json
+
+      - name: Validate live opportunities and governance records with SHACL
+        run: pyshacl -s ontology/funding.shacl.ttl -e ontology/funding.owl.ttl -i rdfs build-a/funding-governance.ttl
