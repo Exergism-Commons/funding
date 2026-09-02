@@ -1,0 +1,32 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf:ECF-OPP-INVALID-CONCENTRATION",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-INVALID-CONCENTRATION",
+      "title": "Concentration fixture",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/invalid-concentration.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-INVALID-CONCENTRATION",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-INVALID-CONCENTRATION",
+      "title": "Invalid concentrated funding without diversification plan",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "ordinary",
+      "rationale": "Deliberately invalid fixture.",
+      "opportunity": "urn:ecf:ECF-OPP-INVALID-CONCENTRATION",
+      "amount": 50000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 0.35,
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "provenance": "tests/fixtures/invalid-concentration.jsonld"
+    }
+  ]
+}
