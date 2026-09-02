@@ -1,6 +1,6 @@
 {
   "@context": "../../ontology/funding-context.jsonld",
-  "@id": "urn:ecf:ECF-DEC-MRG-BOOTSTRAP-001",
+  "@id": "https://id.exergism.org/funding/id/ECF-DEC-MRG-BOOTSTRAP-001",
   "@type": "GovernanceDecision",
   "id": "ECF-DEC-MRG-BOOTSTRAP-001",
   "title": "Bootstrap machine-readable funding governance",
