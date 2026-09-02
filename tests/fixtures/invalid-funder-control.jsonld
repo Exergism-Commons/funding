@@ -2,6 +2,24 @@
   "@context": "../../ontology/funding-context.jsonld",
   "@graph": [
     {
+      "@id": "urn:ecf:ECF-STATE-PHASE-NORMAL-INVALID-CAPTURE",
+      "@type": "NormalState",
+      "id": "ECF-STATE-PHASE-NORMAL-INVALID-CAPTURE",
+      "title": "Normal institutional funding phase",
+      "rationale": "Illustrative non-bootstrap phase.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/invalid-funder-control.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-STATE-DEPENDENCY-DIVERSIFIED-INVALID-CAPTURE",
+      "@type": "DiversifiedState",
+      "id": "ECF-STATE-DEPENDENCY-DIVERSIFIED-INVALID-CAPTURE",
+      "title": "Diversified funding state",
+      "rationale": "Concentration is below the 30 percent threshold, so this fixture isolates governance-for-money.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/invalid-funder-control.jsonld"
+    },
+    {
       "@id": "urn:ecf:ECF-OPP-INVALID-CAPTURE",
       "@type": "FundingOpportunity",
       "id": "ECF-OPP-INVALID-CAPTURE",
@@ -19,6 +37,8 @@
       "approvalClass": "ordinary",
       "rationale": "Deliberately invalid fixture.",
       "opportunity": "urn:ecf:ECF-OPP-INVALID-CAPTURE",
+      "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-NORMAL-INVALID-CAPTURE",
+      "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-DIVERSIFIED-INVALID-CAPTURE",
       "amount": 25000,
       "currency": "EUR",
       "restricted": true,
