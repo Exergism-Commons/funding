@@ -1,0 +1,41 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf:ECF-OPP-VALID-CONCENTRATION",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-VALID-CONCENTRATION",
+      "title": "Valid concentrated funding fixture",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/valid-concentration-with-plan.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-PLAN-DIVERSIFY-VALID-001",
+      "@type": "DiversificationPlan",
+      "id": "ECF-PLAN-DIVERSIFY-VALID-001",
+      "title": "Reduce post-award funding concentration",
+      "rationale": "Add independent unrestricted and project funding so the funder falls below the 30% rolling concentration target.",
+      "provenance": "tests/fixtures/valid-concentration-with-plan.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-ACCEPT-CONCENTRATED-VALID-001",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-ACCEPT-CONCENTRATED-VALID-001",
+      "title": "Accept temporarily concentrated funding with diversification plan",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "ordinary",
+      "rationale": "Fixture demonstrating that concentration above 30% is reviewable when an explicit diversification plan exists.",
+      "opportunity": "urn:ecf:ECF-OPP-VALID-CONCENTRATION",
+      "amount": 50000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 0.35,
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "diversificationPlan": "urn:ecf:ECF-PLAN-DIVERSIFY-VALID-001",
+      "provenance": "tests/fixtures/valid-concentration-with-plan.jsonld"
+    }
+  ]
+}
