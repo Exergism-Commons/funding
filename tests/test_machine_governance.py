@@ -91,6 +91,11 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         conforms, _, report = validate_graph(graph)
         self.assertTrue(conforms, report)
 
+    def test_bootstrap_can_accept_first_funder_at_100_percent(self):
+        graph = parse_jsonld(FIXTURES / "valid-bootstrap-100-percent.jsonld")
+        conforms, _, report = validate_graph(graph)
+        self.assertTrue(conforms, report)
+
     def test_invalid_funder_control_is_rejected(self):
         graph = parse_jsonld(FIXTURES / "invalid-funder-control.jsonld")
         conforms, _, report = validate_graph(graph)
@@ -108,6 +113,12 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         conforms, _, report = validate_graph(graph)
         self.assertFalse(conforms)
         self.assertIn("qualified approval", report)
+
+    def test_dependency_state_must_match_numeric_concentration(self):
+        graph = parse_jsonld(FIXTURES / "invalid-dependency-state-mismatch.jsonld")
+        conforms, _, report = validate_graph(graph)
+        self.assertFalse(conforms)
+        self.assertIn("StrategicDependencyState", report)
 
     def test_self_compensation_vote_is_rejected(self):
         graph = parse_jsonld(FIXTURES / "invalid-self-compensation-vote.jsonld")
