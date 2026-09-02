@@ -1,0 +1,41 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf:ECF-OPP-INVALID-DEPENDENCY",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-INVALID-DEPENDENCY",
+      "title": "Strategic dependency fixture",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/invalid-strategic-dependency-approval.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-PLAN-DIVERSIFY-DEPENDENCY",
+      "@type": "DiversificationPlan",
+      "id": "ECF-PLAN-DIVERSIFY-DEPENDENCY",
+      "title": "Strategic dependency diversification plan",
+      "rationale": "A plan exists so this fixture isolates the separate qualified-approval invariant.",
+      "provenance": "tests/fixtures/invalid-strategic-dependency-approval.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-INVALID-DEPENDENCY",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-INVALID-DEPENDENCY",
+      "title": "Invalid strategic dependency under ordinary approval",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "ordinary",
+      "rationale": "Deliberately invalid fixture: concentration exceeds 50% but approval is ordinary.",
+      "opportunity": "urn:ecf:ECF-OPP-INVALID-DEPENDENCY",
+      "amount": 100000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 0.55,
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "diversificationPlan": "urn:ecf:ECF-PLAN-DIVERSIFY-DEPENDENCY",
+      "provenance": "tests/fixtures/invalid-strategic-dependency-approval.jsonld"
+    }
+  ]
+}
