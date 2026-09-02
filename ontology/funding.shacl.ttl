@@ -1,4 +1,4 @@
-@prefix ecf: <urn:ecf:> .
+@prefix ecf: <https://id.exergism.org/funding#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
@@ -19,12 +19,13 @@ ecf:GovernanceRecordShape a sh:NodeShape ;
     ] ;
     sh:sparql [
         a sh:SPARQLConstraint ;
-        sh:message "stableId and urn:ecf: IRI must identify the same governance record." ;
+        sh:message "Canonical governance-record IRIs must equal https://id.exergism.org/funding/id/{stableId}." ;
         sh:select """
-            PREFIX ecf: <urn:ecf:>
+            PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
-              $this ecf:stableId ?id .
-              FILTER (STR($this) != CONCAT("urn:ecf:", STR(?id)))
+              $this ecf:stableId ?id ; ecf:provenance ?provenance .
+              FILTER (!STRSTARTS(STR(?provenance), "tests/fixtures/"))
+              FILTER (STR($this) != CONCAT("https://id.exergism.org/funding/id/", STR(?id)))
             }
         """
     ] .
@@ -105,7 +106,7 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
         a sh:SPARQLConstraint ;
         sh:message "Funding above 30% rolling concentration requires an explicit DiversificationPlan." ;
         sh:select """
-            PREFIX ecf: <urn:ecf:>
+            PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
               $this ecf:singleFunderConcentrationAfter ?c .
               FILTER (?c > 0.30)
@@ -120,7 +121,7 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
         a sh:SPARQLConstraint ;
         sh:message "Funding above 50% rolling concentration is strategic dependency and requires qualified approval." ;
         sh:select """
-            PREFIX ecf: <urn:ecf:>
+            PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
               $this ecf:singleFunderConcentrationAfter ?c ; ecf:approvalClass ?approval .
               FILTER (?c > 0.50 && ?approval != "qualified")
@@ -131,7 +132,7 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
         a sh:SPARQLConstraint ;
         sh:message "Concentration at or below 30% must be represented by a DiversifiedState." ;
         sh:select """
-            PREFIX ecf: <urn:ecf:>
+            PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
               $this ecf:singleFunderConcentrationAfter ?c ; ecf:dependencyState ?state .
               FILTER (?c <= 0.30)
@@ -143,7 +144,7 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
         a sh:SPARQLConstraint ;
         sh:message "Concentration above 30% and at or below 50% must be represented by an ElevatedConcentrationState." ;
         sh:select """
-            PREFIX ecf: <urn:ecf:>
+            PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
               $this ecf:singleFunderConcentrationAfter ?c ; ecf:dependencyState ?state .
               FILTER (?c > 0.30 && ?c <= 0.50)
@@ -155,7 +156,7 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
         a sh:SPARQLConstraint ;
         sh:message "Concentration above 50% must be explicitly represented by a StrategicDependencyState." ;
         sh:select """
-            PREFIX ecf: <urn:ecf:>
+            PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
               $this ecf:singleFunderConcentrationAfter ?c ; ecf:dependencyState ?state .
               FILTER (?c > 0.50)
@@ -185,7 +186,7 @@ ecf:CompensationDecisionShape a sh:NodeShape ;
         a sh:SPARQLConstraint ;
         sh:message "A compensation beneficiary may not cast a substantive vote on their own compensation decision; their vote must be abstain or absent." ;
         sh:select """
-            PREFIX ecf: <urn:ecf:>
+            PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this ?vote WHERE {
               $this ecf:beneficiary ?beneficiary ; ecf:hasVote ?vote .
               ?vote ecf:voter ?beneficiary ; ecf:voteValue ?value .
@@ -197,7 +198,7 @@ ecf:CompensationDecisionShape a sh:NodeShape ;
         a sh:SPARQLConstraint ;
         sh:message "The compensation beneficiary must be explicitly named as an interested party in a linked conflict disclosure." ;
         sh:select """
-            PREFIX ecf: <urn:ecf:>
+            PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
               $this ecf:beneficiary ?beneficiary .
               FILTER NOT EXISTS {
