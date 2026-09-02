@@ -1,0 +1,61 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf:ECF-STATE-PHASE-BOOTSTRAP-VALID-100",
+      "@type": "BootstrapState",
+      "id": "ECF-STATE-PHASE-BOOTSTRAP-VALID-100",
+      "title": "Bootstrap institutional funding phase",
+      "rationale": "EC has only its first material funding source; high concentration is temporarily unavoidable but does not waive anti-capture safeguards.",
+      "reviewDue": "2027-03-02",
+      "provenance": "tests/fixtures/valid-bootstrap-100-percent.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-STATE-DEPENDENCY-STRATEGIC-VALID-100",
+      "@type": "StrategicDependencyState",
+      "id": "ECF-STATE-DEPENDENCY-STRATEGIC-VALID-100",
+      "title": "Bootstrap strategic dependency",
+      "rationale": "The sole funder represents 100 percent of recorded funding, so strategic dependency is explicitly acknowledged rather than hidden.",
+      "reviewDue": "2026-12-02",
+      "provenance": "tests/fixtures/valid-bootstrap-100-percent.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-OPP-BOOTSTRAP-FIRST-GRANT",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-BOOTSTRAP-FIRST-GRANT",
+      "title": "First material EC grant",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/valid-bootstrap-100-percent.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-PLAN-DIVERSIFY-BOOTSTRAP-100",
+      "@type": "DiversificationPlan",
+      "id": "ECF-PLAN-DIVERSIFY-BOOTSTRAP-100",
+      "title": "Bootstrap diversification plan",
+      "rationale": "Seek independent grants, unrestricted community revenue and mission-aligned earned income so no single funder remains structurally indispensable.",
+      "provenance": "tests/fixtures/valid-bootstrap-100-percent.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-BOOTSTRAP-FIRST-GRANT",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-BOOTSTRAP-FIRST-GRANT",
+      "title": "Accept first EC grant under bootstrap safeguards",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "qualified",
+      "rationale": "The grant creates temporary 100 percent concentration because it is EC's first material funding source. The dependency is explicitly recorded and governed through a diversification plan and enhanced approval.",
+      "opportunity": "urn:ecf:ECF-OPP-BOOTSTRAP-FIRST-GRANT",
+      "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-BOOTSTRAP-VALID-100",
+      "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-STRATEGIC-VALID-100",
+      "amount": 50000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 1.0,
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "diversificationPlan": "urn:ecf:ECF-PLAN-DIVERSIFY-BOOTSTRAP-100",
+      "provenance": "tests/fixtures/valid-bootstrap-100-percent.jsonld"
+    }
+  ]
+}
