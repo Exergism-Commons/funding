@@ -2,6 +2,24 @@
   "@context": "../../ontology/funding-context.jsonld",
   "@graph": [
     {
+      "@id": "urn:ecf:ECF-STATE-PHASE-NORMAL-VALID-001",
+      "@type": "NormalState",
+      "id": "ECF-STATE-PHASE-NORMAL-VALID-001",
+      "title": "Normal institutional funding phase",
+      "rationale": "Illustrative non-bootstrap phase for a diversified funding decision.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-STATE-DEPENDENCY-DIVERSIFIED-VALID-001",
+      "@type": "DiversifiedState",
+      "id": "ECF-STATE-DEPENDENCY-DIVERSIFIED-VALID-001",
+      "title": "Diversified funding state",
+      "rationale": "Single-funder concentration is at or below the 30 percent target.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/valid-governance.jsonld"
+    },
+    {
       "@id": "urn:ecf:ECF-OPP-VALID-001",
       "@type": "FundingOpportunity",
       "id": "ECF-OPP-VALID-001",
@@ -19,6 +37,8 @@
       "approvalClass": "ordinary",
       "rationale": "Fixture demonstrating an acceptance decision below concentration safeguards with no governance or EC-wide IP rights granted.",
       "opportunity": "urn:ecf:ECF-OPP-VALID-001",
+      "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-NORMAL-VALID-001",
+      "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-DIVERSIFIED-VALID-001",
       "amount": 25000,
       "currency": "EUR",
       "restricted": true,
