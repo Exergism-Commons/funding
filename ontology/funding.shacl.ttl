@@ -49,36 +49,22 @@ ecf:FundingOpportunityShape a sh:NodeShape ;
     sh:targetClass ecf:FundingOpportunity ;
     sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
     sh:property [ sh:path ecf:rankEligible ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ] ;
-    sh:sparql [
-        a sh:SPARQLConstraint ;
-        sh:message "A rank-eligible opportunity must contain every EIV dimension exactly once with a value in [0,1]." ;
-        sh:select """
-            PREFIX ecf: <urn:ecf:>
-            SELECT $this WHERE {
-              $this ecf:rankEligible true .
-              VALUES ?p {
-                ecf:fit ecf:fundingValue ecf:capabilityValue ecf:strategicOptionality
-                ecf:autonomyValue ecf:networkValue ecf:recurrence
-                ecf:captureRisk ecf:adminCost ecf:executionRisk
-              }
-              {
-                FILTER NOT EXISTS { $this ?p ?v }
-              } UNION {
-                $this ?p ?v .
-                FILTER (?v < 0 || ?v > 1)
-              } UNION {
-                SELECT $this ?p WHERE {
-                  $this ?p ?v .
-                  VALUES ?p {
-                    ecf:fit ecf:fundingValue ecf:capabilityValue ecf:strategicOptionality
-                    ecf:autonomyValue ecf:networkValue ecf:recurrence
-                    ecf:captureRisk ecf:adminCost ecf:executionRisk
-                  }
-                } GROUP BY $this ?p HAVING (COUNT(?v) != 1)
-              }
-            }
-        """
-    ] .
+    sh:or (
+        [ sh:property [ sh:path ecf:rankEligible ; sh:hasValue false ] ]
+        [
+          sh:property [ sh:path ecf:rankEligible ; sh:hasValue true ] ;
+          sh:property [ sh:path ecf:fit ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+          sh:property [ sh:path ecf:fundingValue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+          sh:property [ sh:path ecf:capabilityValue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+          sh:property [ sh:path ecf:strategicOptionality ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+          sh:property [ sh:path ecf:autonomyValue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+          sh:property [ sh:path ecf:networkValue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+          sh:property [ sh:path ecf:recurrence ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+          sh:property [ sh:path ecf:captureRisk ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+          sh:property [ sh:path ecf:adminCost ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+          sh:property [ sh:path ecf:executionRisk ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ]
+        ]
+    ) .
 
 ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
     sh:targetClass ecf:FundingAcceptanceDecision ;
