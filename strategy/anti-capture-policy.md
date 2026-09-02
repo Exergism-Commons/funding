@@ -51,19 +51,22 @@ Potential sources:
 - recurring sponsorship without governance rights;
 - mission-aligned services;
 - training/support;
-- reserve income where lawful.
+- reserve or Endowment distributions where lawful.
 
 The strategic purpose of core revenue is the institutional capacity to refuse misaligned funding.
 
-## 5. Reserve target
+## 5. Reserve and permanent-capital target
 
 EC should progressively build:
 
 1. three months of operating expenses;
 2. six months;
-3. twelve months as a mature resilience target.
+3. twelve months as a mature resilience target;
+4. an **EC Endowment** that converts part of unrestricted surplus into permanent or very long-duration institutional capital.
 
-Restricted grant funds must not be treated as free reserves.
+Restricted grant funds must not be treated as free reserves or Endowment capital unless the relevant agreement expressly permits that use.
+
+The Endowment is governed separately under `endowment-policy.md`.
 
 ## 6. Transparency registry
 
@@ -86,15 +89,49 @@ Sensitive personal/banking/security information must not be published.
 
 ## 7. Conflict management
 
-A person with a material personal interest in a funding decision should disclose it and abstain from the relevant decision where appropriate.
+A person with a material personal interest in a funding, investment or compensation decision should disclose it and abstain from the relevant decision where appropriate and practicable.
 
 Examples:
 
 - a member whose employer is the funder;
 - a researcher deciding their own compensation package;
-- a governance member negotiating a related-party contract.
+- a governance member negotiating a related-party contract;
+- a decision-maker with a financial interest in an Endowment counterparty.
 
-## 8. Mission distortion test
+Where every active member is conflicted because all are also workers, EC should rely on objective compensation formulas, benchmarking, written rationale and additional review rather than treating the conflict as nonexistent.
+
+## 8. No private ownership through membership
+
+Membership in EC must not function as an economic share in the organisation.
+
+Members do not acquire an automatic right to:
+
+- annual surplus;
+- reserves;
+- Endowment principal;
+- Endowment returns;
+- revenue in proportion to voting rights or membership status.
+
+EC may compensate members for genuine work under applicable law and a documented compensation policy, but **work -> compensation** must remain distinct from **membership -> distribution**.
+
+See `compensation-principles.md`.
+
+## 9. Endowment anti-capture rule
+
+No donor, sponsor, external asset manager or financial institution obtains institutional control merely because it contributes to or manages Endowment assets.
+
+Endowment arrangements should avoid:
+
+- donor governance rights unrelated to a narrowly documented restriction;
+- return or ownership rights that convert a donation into an investment interest;
+- permanent exclusivity;
+- mission-distorting investment conditions;
+- avoidable dependency on a single custodian, manager or counterparty;
+- private claims on EC capital by members or founders.
+
+Material restrictions on Endowment gifts should be accepted only after explicit governance review.
+
+## 10. Mission distortion test
 
 Before accepting material funding, EC should ask:
 
@@ -103,10 +140,11 @@ Before accepting material funding, EC should ask:
 3. Are public outputs and scientific/technical integrity preserved?
 4. Can EC walk away without threatening organisational survival?
 5. Does the agreement create a precedent that weakens future autonomy?
+6. Can any unrestricted surplus or reusable capability strengthen EC after the funded period ends?
 
 A negative answer does not automatically reject funding, but raises the required level of governance scrutiny.
 
-## 9. Exitability
+## 11. Exitability
 
 Funding relationships should be designed so EC can terminate or decline renewal without losing control of:
 
@@ -117,8 +155,12 @@ Funding relationships should be designed so EC can terminate or decline renewal 
 - trademarks;
 - essential infrastructure;
 - pre-existing IP;
-- community channels.
+- community channels;
+- unrestricted reserves;
+- EC Endowment capital.
 
-## 10. Strategic principle
+## 12. Strategic principle
 
 **The correct measure of funding quality is not how much control EC gains over money, but how much durable freedom EC gains after accepting it.**
+
+A mature EC should be progressively harder to capture because part of its future operating capacity is financed by diversified recurring income, liquid reserves and capital that EC itself already owns.
