@@ -2,6 +2,24 @@
   "@context": "../../ontology/funding-context.jsonld",
   "@graph": [
     {
+      "@id": "urn:ecf:ECF-STATE-PHASE-NORMAL-CONCENTRATION-001",
+      "@type": "NormalState",
+      "id": "ECF-STATE-PHASE-NORMAL-CONCENTRATION-001",
+      "title": "Normal institutional funding phase",
+      "rationale": "Illustrative mature operating phase.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/valid-concentration-with-plan.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-STATE-DEPENDENCY-ELEVATED-VALID-001",
+      "@type": "ElevatedConcentrationState",
+      "id": "ECF-STATE-DEPENDENCY-ELEVATED-VALID-001",
+      "title": "Elevated funding concentration",
+      "rationale": "Single-funder concentration is above 30 percent but not above 50 percent.",
+      "reviewDue": "2027-03-02",
+      "provenance": "tests/fixtures/valid-concentration-with-plan.jsonld"
+    },
+    {
       "@id": "urn:ecf:ECF-OPP-VALID-CONCENTRATION",
       "@type": "FundingOpportunity",
       "id": "ECF-OPP-VALID-CONCENTRATION",
@@ -27,6 +45,8 @@
       "approvalClass": "ordinary",
       "rationale": "Fixture demonstrating that concentration above 30% is reviewable when an explicit diversification plan exists.",
       "opportunity": "urn:ecf:ECF-OPP-VALID-CONCENTRATION",
+      "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-NORMAL-CONCENTRATION-001",
+      "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-ELEVATED-VALID-001",
       "amount": 50000,
       "currency": "EUR",
       "restricted": true,
