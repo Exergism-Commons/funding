@@ -22,7 +22,7 @@ Derived RDF / SPARQL       query, audit and dependency analysis
 GitHub review              public change/provenance surface
 ```
 
-The Git repository is the authoritative editable history. A future triplestore is an index, not the source of truth.
+The Git repository is the authoritative editable history. A future triplestore is an index, not the source of truth. Persistent public identity is provided by `id.exergism.org` and is deliberately independent of GitHub and the resolver implementation.
 
 ## 2. Authority boundary
 
@@ -36,12 +36,22 @@ A SHACL pass means only that the machine-readable record is structurally and pro
 
 Likewise, a SHACL failure means the repository state conflicts with an encoded invariant. It is a governance-integrity failure, not an automatic legal conclusion.
 
-## 3. Namespace and artifacts
+`id.exergism.org` is an identifier authority, not a second governance authority. The funding repository and its canonical governance process define the semantics and status of funding records; the identifier service makes those identities persistent and dereferenceable.
 
-The initial namespace is:
+## 3. Persistent namespace and artifacts
+
+Canonical funding identifiers are issued under the Exergism Commons persistent identifier authority:
 
 ```text
-urn:ecf:
+Vocabulary namespace:  https://id.exergism.org/funding#
+Ontology IRI:          https://id.exergism.org/ontology/funding
+Record base:           https://id.exergism.org/funding/id/
+```
+
+A canonical governance record with stable ID `ECF-DEC-EXAMPLE-001` therefore has IRI:
+
+```text
+https://id.exergism.org/funding/id/ECF-DEC-EXAMPLE-001
 ```
 
 Artifacts:
@@ -54,7 +64,15 @@ Artifacts:
 - `tests/test_machine_governance.py` — semantic integrity test suite;
 - `.github/workflows/machine-governance-integrity.yml` — CI enforcement.
 
-`urn:ecf:` is deliberately provider-independent. A later persistent HTTP identifier projection may be added under `id.exergism.org` without making GitHub or the funding website the semantic authority.
+Canonical records and derived opportunity records MUST use the HTTP record base above. Non-canonical test fixtures MAY use non-public IRIs so that tests do not mint fake persistent identifiers.
+
+The identifier architecture is intentionally cross-project but authority remains separated:
+
+- Exergism vocabulary: `https://id.exergism.org/exergism#`;
+- ECL vocabulary: `https://id.exergism.org/ecl#`;
+- Funding vocabulary: `https://id.exergism.org/funding#`.
+
+Shared use of the host does not imply shared semantics or legal authority.
 
 ## 4. Initial domain model
 
@@ -218,7 +236,8 @@ The v0.1 profile is intentionally narrow. Candidate next layers are:
 7. immutable governance snapshots binding policy versions to decisions;
 8. SPARQL dependency checks showing which decisions become stale when a policy or funding condition changes;
 9. formal bootstrap exit criteria once EC has enough financial history to calibrate them;
-10. projection of persistent identifiers through `id.exergism.org`.
+10. publication and maintenance of approved HTML/RDF representations through `id.exergism.org`;
+11. convergence on shared `https://id.exergism.org/entity/...` identifiers for real-world entities referenced across EC projects.
 
 ## 8. Cross-repository governance
 
@@ -232,9 +251,13 @@ EC governance / statutes
 funding policies and machine profile
         ↓
 funding records and decisions
+        ↓
+persistent public identity through id.exergism.org
 ```
 
 ECL and other EC projects may reuse the same semantic-governance patterns, but a software licence must not silently acquire authority over salaries, treasury or the Endowment.
+
+The cross-project identifier authority creates stable links between projects without collapsing their authority boundaries. Historical Exergism and ECL releases are not retroactively rewritten merely because future releases migrate to `id.exergism.org`.
 
 ## 9. Design rule
 
