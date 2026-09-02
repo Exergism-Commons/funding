@@ -68,8 +68,9 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
             shapes,
         )
 
-        context = json.loads(CONTEXT.read_text(encoding="utf-8"))
-        self.assertEqual(context["@context"]["ecf"], VOCABULARY_NAMESPACE)
+        context = json.loads(CONTEXT.read_text(encoding="utf-8"))["@context"]
+        self.assertEqual(context["ecf"]["@id"], VOCABULARY_NAMESPACE)
+        self.assertIs(context["ecf"]["@prefix"], True)
 
     def test_ontology_has_no_property_chain_governance_inference(self):
         ontology = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
