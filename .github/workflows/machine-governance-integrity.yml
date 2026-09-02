@@ -1,0 +1,64 @@
+name: Machine-readable funding governance
+
+on:
+  push:
+    paths:
+      - "knowledge/**"
+      - "ontology/**"
+      - "spec/MACHINE-READABLE-GOVERNANCE.md"
+      - "strategy/**"
+      - "requirements-ontology.txt"
+      - "tests/**"
+      - ".github/workflows/machine-governance-integrity.yml"
+  pull_request:
+    paths:
+      - "knowledge/**"
+      - "ontology/**"
+      - "spec/MACHINE-READABLE-GOVERNANCE.md"
+      - "strategy/**"
+      - "requirements-ontology.txt"
+      - "tests/**"
+      - ".github/workflows/machine-governance-integrity.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  semantic-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-ontology.txt
+
+      - name: Install RDF and SHACL tooling
+        run: python -m pip install -r requirements-ontology.txt
+
+      - name: Run funding governance integrity suite
+        run: python -m unittest discover -s tests -p 'test_*.py' -v
+
+      - name: Parse canonical semantic artifacts
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from rdflib import Graph
+
+          json.load(open('ontology/funding-context.jsonld', encoding='utf-8'))
+          for path in ('ontology/funding.owl.ttl', 'ontology/funding.shacl.ttl'):
+              graph = Graph().parse(path, format='turtle')
+              print(f'parsed {path}: {len(graph)} triples')
+
+          records = sorted(Path('knowledge').rglob('*.jsonld'))
+          assert records, 'no canonical governance records found'
+          graph = Graph()
+          for path in records:
+              graph.parse(path, format='json-ld')
+          print(f'parsed {len(records)} canonical JSON-LD records into {len(graph)} triples')
+          PY
