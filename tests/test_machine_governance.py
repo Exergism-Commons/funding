@@ -131,6 +131,24 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         conforms, _, report = validate_graph(graph)
         self.assertTrue(conforms, report)
 
+    def test_abstract_phase_superclass_is_rejected(self):
+        graph = parse_jsonld(FIXTURES / "invalid-abstract-phase.jsonld")
+        conforms, _, report = validate_graph(graph)
+        self.assertFalse(conforms)
+        self.assertIn("xone", report.lower())
+
+    def test_state_cannot_be_reused_as_diversification_plan(self):
+        graph = parse_jsonld(FIXTURES / "invalid-reused-state-as-plan.jsonld")
+        conforms, _, report = validate_graph(graph)
+        self.assertFalse(conforms)
+        self.assertIn("xone", report.lower())
+
+    def test_dependency_state_has_exactly_one_concrete_class(self):
+        graph = parse_jsonld(FIXTURES / "invalid-multiple-dependency-classes.jsonld")
+        conforms, _, report = validate_graph(graph)
+        self.assertFalse(conforms)
+        self.assertIn("xone", report.lower())
+
     def test_invalid_funder_control_is_rejected(self):
         graph = parse_jsonld(FIXTURES / "invalid-funder-control.jsonld")
         conforms, _, report = validate_graph(graph)
