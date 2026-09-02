@@ -103,6 +103,12 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         self.assertFalse(conforms)
         self.assertIn("DiversificationPlan", report)
 
+    def test_strategic_dependency_requires_qualified_approval(self):
+        graph = parse_jsonld(FIXTURES / "invalid-strategic-dependency-approval.jsonld")
+        conforms, _, report = validate_graph(graph)
+        self.assertFalse(conforms)
+        self.assertIn("qualified approval", report)
+
     def test_self_compensation_vote_is_rejected(self):
         graph = parse_jsonld(FIXTURES / "invalid-self-compensation-vote.jsonld")
         conforms, _, report = validate_graph(graph)
