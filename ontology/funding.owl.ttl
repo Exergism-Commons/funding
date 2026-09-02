@@ -1,13 +1,13 @@
-@prefix ecf: <urn:ecf:> .
+@prefix ecf: <https://id.exergism.org/funding#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-<urn:ecf:ontology> a owl:Ontology ;
+<https://id.exergism.org/ontology/funding> a owl:Ontology ;
     rdfs:label "Exergism Commons funding governance ontology"@en ;
     owl:versionInfo "0.1.0-draft" ;
-    rdfs:comment "TBox for machine-readable funding, treasury, compensation and Endowment governance. It defines semantics only; legal and institutional authority remains with Exergism Commons governance under applicable law and statutes."@en .
+    rdfs:comment "TBox for machine-readable funding, treasury, compensation and Endowment governance. Persistent public identifiers are issued under id.exergism.org; legal and institutional authority remains with Exergism Commons governance under applicable law and statutes."@en .
 
 ecf:GovernanceRecord a owl:Class .
 ecf:FundingOpportunity a owl:Class ; rdfs:subClassOf ecf:GovernanceRecord .
