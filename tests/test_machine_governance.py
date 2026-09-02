@@ -1,9 +1,12 @@
 from pathlib import Path
+import tempfile
 import unittest
 
 from pyshacl import validate as shacl_validate
 from rdflib import Graph
 from rdflib.namespace import OWL
+
+from tools.build_governance_graph import build
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -53,8 +56,38 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         conforms, _, report = validate_graph(graph)
         self.assertTrue(conforms, report)
 
+    def test_live_registry_builds_deterministically_and_conforms(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            first = Path(tmp) / "first"
+            second = Path(tmp) / "second"
+            manifest_a = build(first)
+            manifest_b = build(second)
+
+            self.assertEqual(manifest_a, manifest_b)
+            self.assertEqual(
+                (first / "funding-governance.nt").read_bytes(),
+                (second / "funding-governance.nt").read_bytes(),
+            )
+            self.assertGreater(manifest_a["opportunity_count"], 0)
+            self.assertEqual(
+                manifest_a["rank_eligible_count"],
+                manifest_a["opportunity_count"],
+            )
+
+            graph = Graph().parse(
+                (first / "funding-governance.ttl").as_posix(),
+                format="turtle",
+            )
+            conforms, _, report = validate_graph(graph)
+            self.assertTrue(conforms, report)
+
     def test_valid_fixture_conforms(self):
         graph = parse_jsonld(FIXTURES / "valid-governance.jsonld")
+        conforms, _, report = validate_graph(graph)
+        self.assertTrue(conforms, report)
+
+    def test_concentration_with_explicit_plan_conforms(self):
+        graph = parse_jsonld(FIXTURES / "valid-concentration-with-plan.jsonld")
         conforms, _, report = validate_graph(graph)
         self.assertTrue(conforms, report)
 
