@@ -159,7 +159,26 @@ Funding relationships should be designed so EC can terminate or decline renewal 
 - unrestricted reserves;
 - EC Endowment capital.
 
-## 12. Strategic principle
+## 12. Machine-readable enforcement profile
+
+A reviewable subset of this policy is represented in `ontology/funding.shacl.ttl` and validated against Git-native governance records and the live opportunity registry.
+
+The executable profile currently enforces, among other invariants:
+
+- no governance-for-money flag on funding acceptance records;
+- no EC-wide IP ownership transfer to a funder;
+- no exclusive funder control of core EC infrastructure;
+- diversification planning above the 30% concentration threshold;
+- qualified approval above the 50% strategic-dependency threshold;
+- compensation conflict disclosure and beneficiary abstention;
+- enhanced safeguards for Endowment principal withdrawal;
+- prohibition of a membership-based distributable economic share.
+
+The human policy remains the governance authority. SHACL is a machine-checkable projection of part of that authority, not an independent constitution. A divergence between policy and shapes is itself a review defect and must be resolved explicitly.
+
+See `spec/MACHINE-READABLE-GOVERNANCE.md`.
+
+## 13. Strategic principle
 
 **The correct measure of funding quality is not how much control EC gains over money, but how much durable freedom EC gains after accepting it.**
 
