@@ -1,0 +1,61 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf:ECF-STATE-PHASE-BOOTSTRAP-MISMATCH",
+      "@type": "BootstrapState",
+      "id": "ECF-STATE-PHASE-BOOTSTRAP-MISMATCH",
+      "title": "Bootstrap institutional funding phase",
+      "rationale": "Illustrative bootstrap phase.",
+      "reviewDue": "2027-03-02",
+      "provenance": "tests/fixtures/invalid-dependency-state-mismatch.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-STATE-DEPENDENCY-DIVERSIFIED-MISMATCH",
+      "@type": "DiversifiedState",
+      "id": "ECF-STATE-DEPENDENCY-DIVERSIFIED-MISMATCH",
+      "title": "Incorrectly asserted diversified state",
+      "rationale": "Deliberately incorrect classification for a 100 percent concentration decision.",
+      "reviewDue": "2026-12-02",
+      "provenance": "tests/fixtures/invalid-dependency-state-mismatch.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-OPP-DEPENDENCY-MISMATCH",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-DEPENDENCY-MISMATCH",
+      "title": "Dependency mismatch fixture",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/invalid-dependency-state-mismatch.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-PLAN-DIVERSIFY-MISMATCH",
+      "@type": "DiversificationPlan",
+      "id": "ECF-PLAN-DIVERSIFY-MISMATCH",
+      "title": "Diversification plan",
+      "rationale": "Plan exists so the fixture isolates the dependency-state mismatch.",
+      "provenance": "tests/fixtures/invalid-dependency-state-mismatch.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-DEPENDENCY-MISMATCH",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-DEPENDENCY-MISMATCH",
+      "title": "Incorrectly classify strategic dependency as diversified",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "qualified",
+      "rationale": "Deliberately invalid fixture: safeguards exist, but the dependency state hides the actual 100 percent concentration.",
+      "opportunity": "urn:ecf:ECF-OPP-DEPENDENCY-MISMATCH",
+      "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-BOOTSTRAP-MISMATCH",
+      "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-DIVERSIFIED-MISMATCH",
+      "amount": 50000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 1.0,
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "diversificationPlan": "urn:ecf:ECF-PLAN-DIVERSIFY-MISMATCH",
+      "provenance": "tests/fixtures/invalid-dependency-state-mismatch.jsonld"
+    }
+  ]
+}
