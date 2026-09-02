@@ -30,7 +30,7 @@ ecf:stableId a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:range xsd:str
 ecf:title a owl:DatatypeProperty ; rdfs:range xsd:string .
 ecf:status a owl:DatatypeProperty ; rdfs:range xsd:string .
 ecf:decisionDate a owl:DatatypeProperty ; rdfs:domain ecf:GovernanceDecision ; rdfs:range xsd:date .
-ecf:rationale a owl:DatatypeProperty ; rdfs:domain ecf:GovernanceDecision ; rdfs:range xsd:string .
+ecf:rationale a owl:DatatypeProperty ; rdfs:domain ecf:GovernanceRecord ; rdfs:range xsd:string .
 ecf:approvalClass a owl:DatatypeProperty ; rdfs:domain ecf:GovernanceDecision ; rdfs:range xsd:string .
 ecf:provenance a owl:DatatypeProperty ; rdfs:range xsd:string .
 ecf:supersedes a owl:ObjectProperty ; rdfs:domain ecf:GovernanceRecord ; rdfs:range ecf:GovernanceRecord .
