@@ -18,13 +18,29 @@ ecf:EndowmentPrincipalWithdrawalDecision a owl:Class ; rdfs:subClassOf ecf:Gover
 ecf:Vote a owl:Class ; rdfs:subClassOf ecf:GovernanceRecord .
 ecf:ConflictDisclosure a owl:Class ; rdfs:subClassOf ecf:GovernanceRecord .
 ecf:DiversificationPlan a owl:Class ; rdfs:subClassOf ecf:GovernanceRecord .
+
+ecf:InstitutionalFundingState a owl:Class ; rdfs:subClassOf ecf:GovernanceRecord .
+ecf:FundingPhaseState a owl:Class ; rdfs:subClassOf ecf:InstitutionalFundingState .
+ecf:BootstrapState a owl:Class ; rdfs:subClassOf ecf:FundingPhaseState .
+ecf:NormalState a owl:Class ; rdfs:subClassOf ecf:FundingPhaseState .
+ecf:FundingDependencyState a owl:Class ; rdfs:subClassOf ecf:InstitutionalFundingState .
+ecf:DiversifiedState a owl:Class ; rdfs:subClassOf ecf:FundingDependencyState .
+ecf:ElevatedConcentrationState a owl:Class ; rdfs:subClassOf ecf:FundingDependencyState .
+ecf:StrategicDependencyState a owl:Class ; rdfs:subClassOf ecf:FundingDependencyState .
+
 ecf:Actor a owl:Class .
 ecf:Person a owl:Class ; rdfs:subClassOf ecf:Actor .
 ecf:Organization a owl:Class ; rdfs:subClassOf ecf:Actor .
 ecf:Funder a owl:Class ; rdfs:subClassOf ecf:Organization .
 
 [] a owl:AllDisjointClasses ;
-    owl:members ( ecf:FundingOpportunity ecf:GovernanceDecision ecf:Vote ecf:ConflictDisclosure ecf:DiversificationPlan ) .
+    owl:members ( ecf:FundingOpportunity ecf:GovernanceDecision ecf:Vote ecf:ConflictDisclosure ecf:DiversificationPlan ecf:InstitutionalFundingState ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ecf:BootstrapState ecf:NormalState ) .
+
+[] a owl:AllDisjointClasses ;
+    owl:members ( ecf:DiversifiedState ecf:ElevatedConcentrationState ecf:StrategicDependencyState ) .
 
 ecf:stableId a owl:DatatypeProperty, owl:FunctionalProperty ; rdfs:range xsd:string .
 ecf:title a owl:DatatypeProperty ; rdfs:range xsd:string .
@@ -34,6 +50,7 @@ ecf:rationale a owl:DatatypeProperty ; rdfs:domain ecf:GovernanceRecord ; rdfs:r
 ecf:approvalClass a owl:DatatypeProperty ; rdfs:domain ecf:GovernanceDecision ; rdfs:range xsd:string .
 ecf:provenance a owl:DatatypeProperty ; rdfs:range xsd:string .
 ecf:supersedes a owl:ObjectProperty ; rdfs:domain ecf:GovernanceRecord ; rdfs:range ecf:GovernanceRecord .
+ecf:reviewDue a owl:DatatypeProperty ; rdfs:domain ecf:InstitutionalFundingState ; rdfs:range xsd:date .
 
 ecf:funder a owl:ObjectProperty ; rdfs:range ecf:Funder .
 ecf:opportunity a owl:ObjectProperty ; rdfs:domain ecf:FundingAcceptanceDecision ; rdfs:range ecf:FundingOpportunity .
@@ -57,6 +74,8 @@ ecf:governanceRightGranted a owl:DatatypeProperty ; rdfs:domain ecf:FundingAccep
 ecf:ecWideIpOwnershipGranted a owl:DatatypeProperty ; rdfs:domain ecf:FundingAcceptanceDecision ; rdfs:range xsd:boolean .
 ecf:exclusiveCoreInfrastructureRightGranted a owl:DatatypeProperty ; rdfs:domain ecf:FundingAcceptanceDecision ; rdfs:range xsd:boolean .
 ecf:diversificationPlan a owl:ObjectProperty ; rdfs:domain ecf:FundingAcceptanceDecision ; rdfs:range ecf:DiversificationPlan .
+ecf:institutionalPhase a owl:ObjectProperty ; rdfs:domain ecf:FundingAcceptanceDecision ; rdfs:range ecf:FundingPhaseState .
+ecf:dependencyState a owl:ObjectProperty ; rdfs:domain ecf:FundingAcceptanceDecision ; rdfs:range ecf:FundingDependencyState .
 
 ecf:beneficiary a owl:ObjectProperty ; rdfs:domain ecf:CompensationDecision ; rdfs:range ecf:Person .
 ecf:workBasis a owl:DatatypeProperty ; rdfs:domain ecf:CompensationDecision ; rdfs:range xsd:string .
@@ -74,6 +93,8 @@ ecf:endowmentPurpose a owl:DatatypeProperty ; rdfs:domain ecf:EndowmentPrincipal
 ecf:membershipEconomicShare a owl:DatatypeProperty ; rdfs:range xsd:decimal .
 
 # Reasoning boundary:
+# - phase and dependency are separate axes: BootstrapState can coexist with StrategicDependencyState;
+# - concentration values do not themselves create state individuals by OWL inference;
 # - no score automatically approves or rejects funding;
 # - no concentration threshold automatically executes a governance decision;
 # - no vote count is inferred from membership or office;
