@@ -2,15 +2,24 @@ const state = { opportunities: [], filter: 'all', query: '' };
 
 const positiveDimensions = ['fit','funding_value','capability_value','strategic_optionality','autonomy_value','network_value','recurrence'];
 const negativeDimensions = ['capture_risk','admin_cost','execution_risk'];
+const requiredDimensions = [...positiveDimensions, ...negativeDimensions];
 
 function mean(values) {
   if (!values.length) return 0;
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
+function hasCompleteScore(opportunity) {
+  return requiredDimensions.every(key => {
+    const value = opportunity[key];
+    return typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1;
+  });
+}
+
 function institutionalSignal(opportunity) {
-  const positive = mean(positiveDimensions.map(key => Number(opportunity[key] ?? 0)));
-  const invertedRisk = 1 - mean(negativeDimensions.map(key => Number(opportunity[key] ?? 0)));
+  if (!hasCompleteScore(opportunity)) return null;
+  const positive = mean(positiveDimensions.map(key => opportunity[key]));
+  const invertedRisk = 1 - mean(negativeDimensions.map(key => opportunity[key]));
   return Math.max(0, Math.min(1, (positive + invertedRisk) / 2));
 }
 
@@ -29,10 +38,18 @@ function deadlineLabel(value) {
   if (!value) return '<strong>Continuous</strong><br>strategic engagement';
   const target = new Date(value);
   const now = new Date();
-  const diffDays = Math.ceil((target - now) / 86400000);
+  const targetTime = target.getTime();
   const dateText = formatDate(value);
-  if (diffDays < 0) return `<strong>${dateText}</strong><br>deadline passed`;
-  if (diffDays === 0) return `<strong>${dateText}</strong><br>due today`;
+
+  if (Number.isNaN(targetTime) || !dateText) return '<strong>Unknown</strong><br>deadline unavailable';
+  if (targetTime <= now.getTime()) return `<strong>${dateText}</strong><br>deadline passed`;
+
+  const sameLocalDay = target.getFullYear() === now.getFullYear()
+    && target.getMonth() === now.getMonth()
+    && target.getDate() === now.getDate();
+  if (sameLocalDay) return `<strong>${dateText}</strong><br>due today`;
+
+  const diffDays = Math.ceil((targetTime - now.getTime()) / 86400000);
   if (diffDays === 1) return `<strong>${dateText}</strong><br>1 day remaining`;
   return `<strong>${dateText}</strong><br>${diffDays} days remaining`;
 }
@@ -49,8 +66,14 @@ function matches(opportunity) {
 
 function cardTemplate(opportunity) {
   const signal = institutionalSignal(opportunity);
-  const percent = Math.round(signal * 100);
+  const ranked = signal !== null;
+  const percent = ranked ? Math.round(signal * 100) : null;
   const sourceLink = opportunity.dossier || opportunity.source;
+  const scoreValue = ranked ? `${percent}/100` : 'Not ranked';
+  const scoreTitle = ranked
+    ? 'Non-binding EIV heuristic'
+    : 'Missing or invalid required EIV dimensions; excluded from automated ranking';
+  const scoreWidth = ranked ? percent : 0;
   return `
     <article class="opportunity-card" data-priority="${opportunity.priority}">
       <div class="card-top">
@@ -66,8 +89,8 @@ function cardTemplate(opportunity) {
       </div>
 
       <div class="eiv-wrap">
-        <div class="eiv-row"><span>Institutional value signal</span><strong>${percent}/100</strong></div>
-        <div class="eiv-track" title="Non-binding EIV heuristic"><span style="width:${percent}%"></span></div>
+        <div class="eiv-row"><span>Institutional value signal</span><strong>${scoreValue}</strong></div>
+        <div class="eiv-track" title="${scoreTitle}"><span style="width:${scoreWidth}%"></span></div>
       </div>
 
       <p class="card-next"><strong>Next:</strong> ${opportunity.next_action}</p>
@@ -79,12 +102,21 @@ function cardTemplate(opportunity) {
     </article>`;
 }
 
+function compareByInstitutionalSignal(a, b) {
+  const aSignal = institutionalSignal(a);
+  const bSignal = institutionalSignal(b);
+  if (aSignal === null && bSignal === null) return 0;
+  if (aSignal === null) return 1;
+  if (bSignal === null) return -1;
+  return bSignal - aSignal;
+}
+
 function render() {
   const grid = document.querySelector('#opportunity-grid');
   const empty = document.querySelector('#empty-state');
   const visible = state.opportunities
     .filter(matches)
-    .sort((a,b) => institutionalSignal(b) - institutionalSignal(a));
+    .sort(compareByInstitutionalSignal);
 
   grid.innerHTML = visible.map(cardTemplate).join('');
   empty.hidden = visible.length !== 0;
