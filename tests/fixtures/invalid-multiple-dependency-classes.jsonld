@@ -1,0 +1,61 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf-test:ECF-STATE-PHASE-BOOTSTRAP-MULTI-DEP",
+      "@type": "BootstrapState",
+      "id": "ECF-STATE-PHASE-BOOTSTRAP-MULTI-DEP",
+      "title": "Bootstrap phase",
+      "rationale": "Valid phase so the fixture isolates dependency-class ambiguity.",
+      "reviewDue": "2027-03-02",
+      "provenance": "tests/fixtures/invalid-multiple-dependency-classes.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-STATE-DEPENDENCY-MULTIPLE",
+      "@type": ["DiversifiedState", "StrategicDependencyState"],
+      "id": "ECF-STATE-DEPENDENCY-MULTIPLE",
+      "title": "Contradictory dependency state",
+      "rationale": "Deliberately invalid: one state individual claims two mutually exclusive concrete dependency classes.",
+      "reviewDue": "2026-12-02",
+      "provenance": "tests/fixtures/invalid-multiple-dependency-classes.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-OPP-MULTI-DEP",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-MULTI-DEP",
+      "title": "Multiple dependency class fixture opportunity",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/invalid-multiple-dependency-classes.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-PLAN-MULTI-DEP",
+      "@type": "DiversificationPlan",
+      "id": "ECF-PLAN-MULTI-DEP",
+      "title": "Diversification plan",
+      "rationale": "Plan exists so the fixture isolates contradictory dependency classes.",
+      "provenance": "tests/fixtures/invalid-multiple-dependency-classes.jsonld"
+    },
+    {
+      "@id": "urn:ecf-test:ECF-DEC-MULTI-DEP",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-MULTI-DEP",
+      "title": "Invalid decision with multiply classified dependency state",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "qualified",
+      "rationale": "Deliberately invalid dependency-state ambiguity fixture.",
+      "opportunity": "urn:ecf-test:ECF-OPP-MULTI-DEP",
+      "institutionalPhase": "urn:ecf-test:ECF-STATE-PHASE-BOOTSTRAP-MULTI-DEP",
+      "dependencyState": "urn:ecf-test:ECF-STATE-DEPENDENCY-MULTIPLE",
+      "diversificationPlan": "urn:ecf-test:ECF-PLAN-MULTI-DEP",
+      "amount": 50000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 1.0,
+      "governanceRightGranted": false,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "provenance": "tests/fixtures/invalid-multiple-dependency-classes.jsonld"
+    }
+  ]
+}
