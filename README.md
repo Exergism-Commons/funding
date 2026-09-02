@@ -4,7 +4,7 @@ Public funding intelligence and institutional-capacity repository for **Exergism
 
 **Website:** https://funding.exergism.org
 
-EC does not optimise for the largest possible grant. It optimises for **durable autonomous capacity**: money, people, infrastructure, legitimacy, knowledge and networks, while minimising capture, dependency and administrative drag.
+EC does not optimise for the largest possible grant. It optimises for **durable autonomous capacity**: money, people, infrastructure, legitimacy, knowledge, networks and institutionally owned capital, while minimising capture, dependency and administrative drag.
 
 ## Objectives
 
@@ -14,6 +14,7 @@ EC does not optimise for the largest possible grant. It optimises for **durable 
 4. Build European and international research, open-source and public-sector networks.
 5. Keep funding conditions and conflicts transparent.
 6. Prevent any funder from obtaining governance, roadmap or IP control over EC.
+7. Build an **EC Endowment** so that a growing share of future activity can be financed from capital EC already owns and controls.
 
 ## Portfolio model
 
@@ -27,13 +28,33 @@ EC should deliberately combine:
 - Institutional sponsorships and memberships.
 - Community funding and donations.
 - Contracts, training and services consistent with EC's mission.
-- Long-term reserves/endowment-like capital where legally and financially appropriate.
+- Strategic reserves for continuity and refusal capacity.
+- **EC Endowment** — long-duration institutional capital designed to compound and support recurring mission expenditure.
 
 No single category should become synonymous with EC's survival.
 
+## Capital architecture
+
+EC distinguishes three financial pools:
+
+1. **Operating Treasury** — current and near-term obligations.
+2. **Strategic Reserve** — liquid resilience capital, progressively targeting 3, 6 and ultimately 12 months of core operating expenses.
+3. **EC Endowment** — permanent or very long-duration institutional capital intended to compound and finance future EC activity through a controlled spending rule.
+
+The Endowment belongs to EC. Membership does not create an economic claim on it.
+
+People may be compensated for genuine work performed for EC under applicable law and EC governance, but compensation is not a distribution of membership ownership, surplus or Endowment returns.
+
+See:
+
+- `strategy/endowment-policy.md`
+- `strategy/treasury-strategy.md`
+- `strategy/compensation-principles.md`
+- `strategy/anti-capture-policy.md`
+
 ## Repository structure
 
-- `strategy/` — portfolio design, independence rules and treasury principles.
+- `strategy/` — portfolio design, independence, treasury, Endowment and compensation principles.
 - `opportunities/` — actionable calls and monitored opportunities.
 - `programmes/` — persistent knowledge about recurring funding programmes.
 - `partnerships/` — strategic networks and institutions relevant to funding and expansion.
@@ -65,6 +86,7 @@ See `strategy/funding-strategy.md` and `strategy/anti-capture-policy.md` for the
 4. MSCA Postdoctoral Fellowships 2027 — assess EC as a host organisation and identify suitable researcher/supervision architecture.
 5. COST Open Call 2026 — assess a European network around digital commons governance.
 6. Build recurring unrestricted funding through sponsorship, membership, donations and mission-aligned services.
+7. Build the legal, accounting and governance foundations required for an eventual EC Endowment.
 
 ## Status
 
