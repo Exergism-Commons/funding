@@ -1,0 +1,32 @@
+{
+  "@context": "../../ontology/funding-context.jsonld",
+  "@graph": [
+    {
+      "@id": "urn:ecf:ECF-OPP-INVALID-CAPTURE",
+      "@type": "FundingOpportunity",
+      "id": "ECF-OPP-INVALID-CAPTURE",
+      "title": "Capture fixture",
+      "rankEligible": false,
+      "provenance": "tests/fixtures/invalid-funder-control.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-DEC-INVALID-CAPTURE",
+      "@type": "FundingAcceptanceDecision",
+      "id": "ECF-DEC-INVALID-CAPTURE",
+      "title": "Invalid funding with governance rights",
+      "status": "proposed",
+      "decisionDate": "2026-09-02",
+      "approvalClass": "ordinary",
+      "rationale": "Deliberately invalid fixture.",
+      "opportunity": "urn:ecf:ECF-OPP-INVALID-CAPTURE",
+      "amount": 25000,
+      "currency": "EUR",
+      "restricted": true,
+      "singleFunderConcentrationAfter": 0.20,
+      "governanceRightGranted": true,
+      "ecWideIpOwnershipGranted": false,
+      "exclusiveCoreInfrastructureRightGranted": false,
+      "provenance": "tests/fixtures/invalid-funder-control.jsonld"
+    }
+  ]
+}
