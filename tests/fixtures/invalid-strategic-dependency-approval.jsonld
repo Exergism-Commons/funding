@@ -2,6 +2,24 @@
   "@context": "../../ontology/funding-context.jsonld",
   "@graph": [
     {
+      "@id": "urn:ecf:ECF-STATE-PHASE-NORMAL-INVALID-DEPENDENCY",
+      "@type": "NormalState",
+      "id": "ECF-STATE-PHASE-NORMAL-INVALID-DEPENDENCY",
+      "title": "Normal institutional funding phase",
+      "rationale": "Illustrative non-bootstrap phase.",
+      "reviewDue": "2027-09-02",
+      "provenance": "tests/fixtures/invalid-strategic-dependency-approval.jsonld"
+    },
+    {
+      "@id": "urn:ecf:ECF-STATE-DEPENDENCY-STRATEGIC-INVALID-001",
+      "@type": "StrategicDependencyState",
+      "id": "ECF-STATE-DEPENDENCY-STRATEGIC-INVALID-001",
+      "title": "Strategic funding dependency",
+      "rationale": "Single-funder concentration exceeds 50 percent and is correctly classified; this fixture isolates the approval-class failure.",
+      "reviewDue": "2026-12-02",
+      "provenance": "tests/fixtures/invalid-strategic-dependency-approval.jsonld"
+    },
+    {
       "@id": "urn:ecf:ECF-OPP-INVALID-DEPENDENCY",
       "@type": "FundingOpportunity",
       "id": "ECF-OPP-INVALID-DEPENDENCY",
@@ -27,6 +45,8 @@
       "approvalClass": "ordinary",
       "rationale": "Deliberately invalid fixture: concentration exceeds 50% but approval is ordinary.",
       "opportunity": "urn:ecf:ECF-OPP-INVALID-DEPENDENCY",
+      "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-NORMAL-INVALID-DEPENDENCY",
+      "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-STRATEGIC-INVALID-001",
       "amount": 100000,
       "currency": "EUR",
       "restricted": true,
