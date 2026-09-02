@@ -3,7 +3,7 @@ import tempfile
 import unittest
 
 from pyshacl import validate as shacl_validate
-from rdflib import Graph
+from rdflib import Graph, Namespace, RDF, URIRef
 from rdflib.namespace import OWL
 
 from tools.build_governance_graph import build
@@ -12,7 +12,12 @@ from tools.build_governance_graph import build
 ROOT = Path(__file__).resolve().parents[1]
 ONTOLOGY = ROOT / "ontology" / "funding.owl.ttl"
 SHAPES = ROOT / "ontology" / "funding.shacl.ttl"
+CONTEXT = ROOT / "ontology" / "funding-context.jsonld"
 FIXTURES = ROOT / "tests" / "fixtures"
+VOCABULARY_NAMESPACE = "https://id.exergism.org/funding#"
+ONTOLOGY_IRI = "https://id.exergism.org/ontology/funding"
+RECORD_BASE = "https://id.exergism.org/funding/id/"
+ECF = Namespace(VOCABULARY_NAMESPACE)
 
 
 def parse_jsonld(path: Path) -> Graph:
@@ -40,11 +45,35 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         shapes = Graph().parse(SHAPES.as_posix(), format="turtle")
         self.assertGreater(len(ontology), 0)
         self.assertGreater(len(shapes), 0)
+        self.assertIn((URIRef(ONTOLOGY_IRI), RDF.type, OWL.Ontology), ontology)
 
     def test_ontology_has_no_property_chain_governance_inference(self):
         ontology = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
         chains = list(ontology.triples((None, OWL.propertyChainAxiom, None)))
         self.assertEqual(chains, [])
+
+    def test_canonical_semantic_sources_do_not_reintroduce_urn_ecf(self):
+        paths = [
+            ONTOLOGY,
+            SHAPES,
+            CONTEXT,
+            ROOT / "tools" / "build_governance_graph.py",
+            *sorted((ROOT / "knowledge").rglob("*.jsonld")),
+        ]
+        for path in paths:
+            self.assertNotIn("urn:ecf:", path.read_text(encoding="utf-8"), path)
+
+    def test_canonical_knowledge_uses_id_exergism_record_base(self):
+        graph = Graph()
+        paths = sorted((ROOT / "knowledge").rglob("*.jsonld"))
+        self.assertGreater(len(paths), 0)
+        for path in paths:
+            graph.parse(path.as_posix(), format="json-ld")
+
+        records = list(graph.subject_objects(ECF.stableId))
+        self.assertGreater(len(records), 0)
+        for subject, stable_id in records:
+            self.assertEqual(str(subject), f"{RECORD_BASE}{stable_id}")
 
     def test_canonical_knowledge_conforms(self):
         graph = Graph()
@@ -73,11 +102,17 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
                 manifest_a["rank_eligible_count"],
                 manifest_a["opportunity_count"],
             )
+            self.assertEqual(manifest_a["vocabulary_namespace"], VOCABULARY_NAMESPACE)
+            self.assertEqual(manifest_a["ontology_iri"], ONTOLOGY_IRI)
+            self.assertEqual(manifest_a["record_base"], RECORD_BASE)
 
             graph = Graph().parse(
                 (first / "funding-governance.ttl").as_posix(),
                 format="turtle",
             )
+            for subject, stable_id in graph.subject_objects(ECF.stableId):
+                self.assertEqual(str(subject), f"{RECORD_BASE}{stable_id}")
+
             conforms, _, report = validate_graph(graph)
             self.assertTrue(conforms, report)
 
