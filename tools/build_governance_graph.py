@@ -32,7 +32,7 @@ DIMENSION_PREDICATES = {
     "fit": ECF.fit,
     "funding_value": ECF.fundingValue,
     "capability_value": ECF.capabilityValue,
-    "strategic_optional ity": ECF.strategicOptionality,
+    "strategic_optionality": ECF.strategicOptionality,
     "autonomy_value": ECF.autonomyValue,
     "network_value": ECF.networkValue,
     "recurrence": ECF.recurrence,
