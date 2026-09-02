@@ -23,13 +23,16 @@ from rdflib.namespace import XSD
 
 
 ROOT = Path(__file__).resolve().parents[1]
-ECF = Namespace("urn:ecf:")
+VOCABULARY_NAMESPACE = "https://id.exergism.org/funding#"
+ONTOLOGY_IRI = "https://id.exergism.org/ontology/funding"
+RECORD_BASE = "https://id.exergism.org/funding/id/"
+ECF = Namespace(VOCABULARY_NAMESPACE)
 
 DIMENSION_PREDICATES = {
     "fit": ECF.fit,
     "funding_value": ECF.fundingValue,
     "capability_value": ECF.capabilityValue,
-    "strategic_optionality": ECF.strategicOptionality,
+    "strategic_optional ity": ECF.strategicOptionality,
     "autonomy_value": ECF.autonomyValue,
     "network_value": ECF.networkValue,
     "recurrence": ECF.recurrence,
@@ -92,7 +95,7 @@ def load_opportunity_graph(path: Path) -> tuple[Graph, dict]:
         if stable_id in seen:
             raise ValueError(f"duplicate derived stable ID: {stable_id}")
         seen.add(stable_id)
-        subject = URIRef(f"urn:ecf:{stable_id}")
+        subject = URIRef(f"{RECORD_BASE}{stable_id}")
 
         graph.add((subject, RDF.type, ECF.FundingOpportunity))
         graph.add((subject, ECF.stableId, Literal(stable_id)))
@@ -123,6 +126,9 @@ def load_opportunity_graph(path: Path) -> tuple[Graph, dict]:
         "source_sha256": hashlib.sha256(raw).hexdigest(),
         "opportunity_count": len(opportunities),
         "rank_eligible_count": rank_eligible_count,
+        "vocabulary_namespace": VOCABULARY_NAMESPACE,
+        "ontology_iri": ONTOLOGY_IRI,
+        "record_base": RECORD_BASE,
     }
     return graph, metadata
 
