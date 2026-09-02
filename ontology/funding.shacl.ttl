@@ -1,0 +1,172 @@
+@prefix ecf: <urn:ecf:> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# SHACL defines repository/governance-record validity. It does not execute
+# payments, accept grants, set salaries or replace the competent EC body.
+
+ecf:GovernanceRecordShape a sh:NodeShape ;
+    sh:targetClass ecf:GovernanceRecord ;
+    sh:property [
+        sh:path ecf:stableId ;
+        sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
+        sh:pattern "^ECF-[A-Z0-9-]+$"
+    ] ;
+    sh:property [
+        sh:path ecf:provenance ;
+        sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "stableId and urn:ecf: IRI must identify the same governance record." ;
+        sh:select """
+            PREFIX ecf: <urn:ecf:>
+            SELECT $this WHERE {
+              $this ecf:stableId ?id .
+              FILTER (STR($this) != CONCAT("urn:ecf:", STR(?id)))
+            }
+        """
+    ] .
+
+ecf:GovernanceDecisionShape a sh:NodeShape ;
+    sh:targetClass ecf:GovernanceDecision ;
+    sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [
+        sh:path ecf:status ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:in ( "proposed" "approved" "rejected" "superseded" )
+    ] ;
+    sh:property [ sh:path ecf:decisionDate ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ;
+    sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [
+        sh:path ecf:approvalClass ; sh:minCount 1 ; sh:maxCount 1 ;
+        sh:in ( "ordinary" "qualified" "emergency" )
+    ] .
+
+# All ten EIV dimensions are mandatory if an opportunity is eligible for
+# automated ranking. Missing values are never silently defaulted.
+ecf:FundingOpportunityShape a sh:NodeShape ;
+    sh:targetClass ecf:FundingOpportunity ;
+    sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ecf:rankEligible ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A rank-eligible opportunity must contain every EIV dimension exactly once with a value in [0,1]." ;
+        sh:select """
+            PREFIX ecf: <urn:ecf:>
+            SELECT $this WHERE {
+              $this ecf:rankEligible true .
+              VALUES ?p {
+                ecf:fit ecf:fundingValue ecf:capabilityValue ecf:strategicOptionality
+                ecf:autonomyValue ecf:networkValue ecf:recurrence
+                ecf:captureRisk ecf:adminCost ecf:executionRisk
+              }
+              {
+                FILTER NOT EXISTS { $this ?p ?v }
+              } UNION {
+                $this ?p ?v .
+                FILTER (?v < 0 || ?v > 1)
+              } UNION {
+                SELECT $this ?p WHERE {
+                  $this ?p ?v .
+                  VALUES ?p {
+                    ecf:fit ecf:fundingValue ecf:capabilityValue ecf:strategicOptionality
+                    ecf:autonomyValue ecf:networkValue ecf:recurrence
+                    ecf:captureRisk ecf:adminCost ecf:executionRisk
+                  }
+                } GROUP BY $this ?p HAVING (COUNT(?v) != 1)
+              }
+            }
+        """
+    ] .
+
+ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
+    sh:targetClass ecf:FundingAcceptanceDecision ;
+    sh:property [ sh:path ecf:opportunity ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:FundingOpportunity ] ;
+    sh:property [ sh:path ecf:amount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+    sh:property [ sh:path ecf:currency ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[A-Z]{3}$" ] ;
+    sh:property [ sh:path ecf:restricted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ] ;
+    sh:property [ sh:path ecf:singleFunderConcentrationAfter ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+    sh:property [ sh:path ecf:governanceRightGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
+    sh:property [ sh:path ecf:ecWideIpOwnershipGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
+    sh:property [ sh:path ecf:exclusiveCoreInfrastructureRightGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Funding above 30% rolling concentration requires an explicit DiversificationPlan." ;
+        sh:select """
+            PREFIX ecf: <urn:ecf:>
+            SELECT $this WHERE {
+              $this ecf:singleFunderConcentrationAfter ?c .
+              FILTER (?c > 0.30)
+              FILTER NOT EXISTS {
+                $this ecf:diversificationPlan ?plan .
+                ?plan a ecf:DiversificationPlan ; ecf:stableId ?planId .
+              }
+            }
+        """
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Funding above 50% rolling concentration is strategic dependency and requires qualified approval." ;
+        sh:select """
+            PREFIX ecf: <urn:ecf:>
+            SELECT $this WHERE {
+              $this ecf:singleFunderConcentrationAfter ?c ; ecf:approvalClass ?approval .
+              FILTER (?c > 0.50 && ?approval != "qualified")
+            }
+        """
+    ] .
+
+ecf:VoteShape a sh:NodeShape ;
+    sh:targetClass ecf:Vote ;
+    sh:property [ sh:path ecf:voter ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:Person ] ;
+    sh:property [ sh:path ecf:voteValue ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( "approve" "reject" "abstain" ) ] .
+
+ecf:ConflictDisclosureShape a sh:NodeShape ;
+    sh:targetClass ecf:ConflictDisclosure ;
+    sh:property [ sh:path ecf:interestedParty ; sh:minCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:Person ] ;
+    sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
+
+ecf:CompensationDecisionShape a sh:NodeShape ;
+    sh:targetClass ecf:CompensationDecision ;
+    sh:property [ sh:path ecf:beneficiary ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:Person ] ;
+    sh:property [ sh:path ecf:workBasis ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ecf:compensationAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+    sh:property [ sh:path ecf:currency ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[A-Z]{3}$" ] ;
+    sh:property [ sh:path ecf:conflictDisclosure ; sh:minCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:ConflictDisclosure ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A compensation beneficiary may not cast a substantive vote on their own compensation decision; their vote must be abstain or absent." ;
+        sh:select """
+            PREFIX ecf: <urn:ecf:>
+            SELECT $this ?vote WHERE {
+              $this ecf:beneficiary ?beneficiary ; ecf:hasVote ?vote .
+              ?vote ecf:voter ?beneficiary ; ecf:voteValue ?value .
+              FILTER (?value != "abstain")
+            }
+        """
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "The compensation beneficiary must be explicitly named as an interested party in a linked conflict disclosure." ;
+        sh:select """
+            PREFIX ecf: <urn:ecf:>
+            SELECT $this WHERE {
+              $this ecf:beneficiary ?beneficiary ; ecf:conflictDisclosure ?disclosure .
+              FILTER NOT EXISTS { ?disclosure ecf:interestedParty ?beneficiary }
+            }
+        """
+    ] .
+
+ecf:EndowmentPrincipalWithdrawalDecisionShape a sh:NodeShape ;
+    sh:targetClass ecf:EndowmentPrincipalWithdrawalDecision ;
+    sh:property [ sh:path ecf:principalWithdrawalAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minExclusive 0 ] ;
+    sh:property [ sh:path ecf:currency ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[A-Z]{3}$" ] ;
+    sh:property [ sh:path ecf:exceptionalCondition ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue true ] ;
+    sh:property [ sh:path ecf:approvalClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:hasValue "qualified" ] ;
+    sh:property [ sh:path ecf:endowmentPurpose ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
+
+# Membership itself never creates a distributable economic share in EC.
+ecf:NoMembershipEconomicShareShape a sh:NodeShape ;
+    sh:targetSubjectsOf ecf:membershipEconomicShare ;
+    sh:property [ sh:path ecf:membershipEconomicShare ; sh:maxCount 0 ] .
