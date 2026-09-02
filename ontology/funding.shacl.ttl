@@ -81,6 +81,14 @@ ecf:DiversificationPlanShape a sh:NodeShape ;
     sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
     sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
 
+# Institutional maturity and dependency are deliberately separate axes. A new
+# EC can therefore be in BootstrapState and StrategicDependencyState at once.
+ecf:InstitutionalFundingStateShape a sh:NodeShape ;
+    sh:targetClass ecf:InstitutionalFundingState ;
+    sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ecf:reviewDue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] .
+
 ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
     sh:targetClass ecf:FundingAcceptanceDecision ;
     sh:property [ sh:path ecf:opportunity ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:FundingOpportunity ] ;
@@ -88,6 +96,8 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
     sh:property [ sh:path ecf:currency ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[A-Z]{3}$" ] ;
     sh:property [ sh:path ecf:restricted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ] ;
     sh:property [ sh:path ecf:singleFunderConcentrationAfter ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+    sh:property [ sh:path ecf:institutionalPhase ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:FundingPhaseState ] ;
+    sh:property [ sh:path ecf:dependencyState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:FundingDependencyState ] ;
     sh:property [ sh:path ecf:governanceRightGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
     sh:property [ sh:path ecf:ecWideIpOwnershipGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
     sh:property [ sh:path ecf:exclusiveCoreInfrastructureRightGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
@@ -114,6 +124,42 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
             SELECT $this WHERE {
               $this ecf:singleFunderConcentrationAfter ?c ; ecf:approvalClass ?approval .
               FILTER (?c > 0.50 && ?approval != "qualified")
+            }
+        """
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Concentration at or below 30% must be represented by a DiversifiedState." ;
+        sh:select """
+            PREFIX ecf: <urn:ecf:>
+            SELECT $this WHERE {
+              $this ecf:singleFunderConcentrationAfter ?c ; ecf:dependencyState ?state .
+              FILTER (?c <= 0.30)
+              FILTER NOT EXISTS { ?state a ecf:DiversifiedState }
+            }
+        """
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Concentration above 30% and at or below 50% must be represented by an ElevatedConcentrationState." ;
+        sh:select """
+            PREFIX ecf: <urn:ecf:>
+            SELECT $this WHERE {
+              $this ecf:singleFunderConcentrationAfter ?c ; ecf:dependencyState ?state .
+              FILTER (?c > 0.30 && ?c <= 0.50)
+              FILTER NOT EXISTS { ?state a ecf:ElevatedConcentrationState }
+            }
+        """
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Concentration above 50% must be explicitly represented by a StrategicDependencyState." ;
+        sh:select """
+            PREFIX ecf: <urn:ecf:>
+            SELECT $this WHERE {
+              $this ecf:singleFunderConcentrationAfter ?c ; ecf:dependencyState ?state .
+              FILTER (?c > 0.50)
+              FILTER NOT EXISTS { ?state a ecf:StrategicDependencyState }
             }
         """
     ] .
