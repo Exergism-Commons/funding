@@ -1,6 +1,6 @@
 {
   "@context": {
-    "ecf": "urn:ecf:",
+    "ecf": "https://id.exergism.org/funding#",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
     "iri": "@id",
     "type": "@type",
