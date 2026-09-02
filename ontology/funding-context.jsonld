@@ -1,7 +1,7 @@
 {
   "@context": {
-    "ecf": "https://id.exergism.org/funding#",
-    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "ecf": {"@id": "https://id.exergism.org/funding#", "@prefix": true},
+    "xsd": {"@id": "http://www.w3.org/2001/XMLSchema#", "@prefix": true},
     "iri": "@id",
     "type": "@type",
     "id": "ecf:stableId",
