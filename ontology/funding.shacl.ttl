@@ -76,6 +76,11 @@ ecf:FundingOpportunityShape a sh:NodeShape ;
         ]
     ) .
 
+ecf:DiversificationPlanShape a sh:NodeShape ;
+    sh:targetClass ecf:DiversificationPlan ;
+    sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
+
 ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
     sh:targetClass ecf:FundingAcceptanceDecision ;
     sh:property [ sh:path ecf:opportunity ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:FundingOpportunity ] ;
