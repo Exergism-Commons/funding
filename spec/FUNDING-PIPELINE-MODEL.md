@@ -1,20 +1,8 @@
 # Funding pipeline classification model
 
-This document defines how Exergism Commons separates persistent funding knowledge, concrete external opportunities, EC proposals and strategic relationships.
+This document defines how Exergism Commons separates concrete external opportunities, EC proposals and strategic relationships.
 
 ## Core objects
-
-### Programme
-
-A **programme** is a persistent or recurring funding/network mechanism whose identity survives individual call rounds.
-
-Examples:
-
-- Marie Skłodowska-Curie Actions / Postdoctoral Fellowships
-- COST
-- NLnet Restack Fund
-
-Persistent programme knowledge belongs under `programmes/`. Programme files should describe recurring rules, institutional characteristics, recurring eligibility patterns and reusable knowledge rather than one dated call instance.
 
 ### Opportunity
 
@@ -27,6 +15,8 @@ Examples:
 - `msca-pf-2027`
 
 Opportunity paths are stable. Lifecycle state MUST NOT be encoded in a directory such as `active/`, `closed/` or `archived/`, because moving a dossier when its state changes would break durable links.
+
+External programme names such as NLnet Restack, COST Actions or Horizon Europe / MSCA may be recorded in the opportunity's `programme` metadata. They are descriptive attributes, not separate first-class repository objects.
 
 ### Proposal
 
@@ -83,11 +73,10 @@ Narrative dossiers provide analysis and context but MUST not silently override s
 ## Relationship example
 
 ```text
-programme: NLnet Restack Fund
-        ↓
 opportunity: nlnet-2026-09
+  programme: NLnet open technology grants
         ↓
 proposal: nlnet-restack-2026
 ```
 
-The opportunity records the external call. The proposal records what EC intends to submit. They evolve independently and retain separate histories.
+The opportunity records the external call and may name its external programme as metadata. The proposal records what EC intends to submit. They evolve independently and retain separate histories.
