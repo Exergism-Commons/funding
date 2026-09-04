@@ -61,6 +61,14 @@ def github_blob(path: str | None) -> str | None:
     return REPOSITORY_BLOB_BASE + path.lstrip("/")
 
 
+def display_path(path: Path) -> str:
+    """Display repository-relative paths when possible, otherwise the absolute path."""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def opportunity_index(source: dict[str, Any]) -> dict[str, dict[str, Any]]:
     index: dict[str, dict[str, Any]] = {}
     for opportunity in source.get("opportunities", []):
@@ -182,17 +190,18 @@ def encoded(payload: dict[str, Any]) -> str:
 
 def emit(path: Path, payload: dict[str, Any], check: bool) -> bool:
     expected = encoded(payload)
+    label = display_path(path)
     if check:
         actual = path.read_text(encoding="utf-8") if path.exists() else None
         if actual != expected:
-            print(f"out of date: {path.relative_to(ROOT)}")
+            print(f"out of date: {label}")
             return False
-        print(f"current: {path.relative_to(ROOT)}")
+        print(f"current: {label}")
         return True
 
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(expected, encoding="utf-8")
-    print(f"wrote: {path.relative_to(ROOT)}")
+    print(f"wrote: {label}")
     return True
 
 
