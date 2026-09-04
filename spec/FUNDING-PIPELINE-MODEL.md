@@ -20,9 +20,9 @@ External programme names such as NLnet Restack, COST Actions or Horizon Europe /
 
 ### Proposal
 
-A **proposal** is EC's concrete response to an opportunity. Proposals live under `proposals/<proposal-id>/` and MUST reference the opportunity they respond to through `opportunity_id` when such an opportunity exists.
+A **proposal** is EC's concrete response to an opportunity. Proposals live under `proposals/<proposal-id>/` and MUST reference the opportunity they respond to through `opportunity_id`.
 
-One opportunity may produce zero, one or multiple proposals. A proposal is therefore never the canonical source for call-level facts.
+One opportunity may produce zero, one or multiple proposals. A proposal is therefore never the canonical source for call-level facts. Proposal metadata MUST NOT duplicate opportunity-owned facts such as the external funder, call deadline or primary call source. Public proposal projections resolve those values through `opportunity_id`, and generation MUST fail when the referenced opportunity does not exist.
 
 ### Partnership
 
@@ -69,6 +69,8 @@ EC's internal attention priority, currently `P0`, `P1`, etc. Priority is not lif
 Narrative dossiers provide analysis and context but MUST not silently override structured fields such as status, deadline, kind or priority.
 
 `tools/build_dashboard_data.py` produces disposable JSON projections for the public dashboard. The checked-in generated files under `docs/data/` are validated by CI against the canonical YAML sources.
+
+The dashboard preserves deadline cutoff times and their source UTC offsets instead of converting them to the browser's local timezone. Proposal metadata is rendered as text nodes, and proposal links are restricted to validated HTTPS URLs before insertion into the document.
 
 ## Relationship example
 
