@@ -1,0 +1,38 @@
+name: Funding dashboard data integrity
+
+on:
+  push:
+    paths:
+      - "data/opportunities.yaml"
+      - "proposals/**"
+      - "tools/build_dashboard_data.py"
+      - "docs/data/**"
+      - ".github/workflows/dashboard-data-integrity.yml"
+  pull_request:
+    paths:
+      - "data/opportunities.yaml"
+      - "proposals/**"
+      - "tools/build_dashboard_data.py"
+      - "docs/data/**"
+      - ".github/workflows/dashboard-data-integrity.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  generated-data:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: requirements-ontology.txt
+
+      - name: Install dashboard build dependency
+        run: python -m pip install 'PyYAML>=6.0,<7'
+
+      - name: Verify checked-in dashboard projections
+        run: python tools/build_dashboard_data.py --check
