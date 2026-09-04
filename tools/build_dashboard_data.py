@@ -25,6 +25,9 @@ POSITIVE_DIMENSIONS = [
     "recurrence",
 ]
 NEGATIVE_DIMENSIONS = ["capture_risk", "admin_cost", "execution_risk"]
+DISPLAY_OVERRIDES = {
+    "horizon_europe": "Horizon Europe",
+}
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -45,6 +48,8 @@ def humanize(value: Any) -> Any:
     value = scalar(value)
     if not isinstance(value, str):
         return value
+    if value in DISPLAY_OVERRIDES:
+        return DISPLAY_OVERRIDES[value]
     return value.replace("_", " ").strip().capitalize()
 
 
