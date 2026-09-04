@@ -1,6 +1,21 @@
 {
-  "schema_version": 2,
+  "schema_version": 3,
   "updated": "2026-09-04",
+  "classification": {
+    "kinds": [
+      "funding_call",
+      "network_call",
+      "strategic_engagement"
+    ],
+    "statuses": [
+      "cancelled",
+      "closed",
+      "continuous",
+      "forthcoming",
+      "open"
+    ],
+    "description": "Kind, lifecycle status and EC priority are independent classification axes."
+  },
   "heuristic": {
     "positive_dimensions": [
       "fit",
@@ -21,9 +36,10 @@
   "opportunities": [
     {
       "id": "cost-open-call-2026",
+      "kind": "network_call",
       "name": "COST Open Call 2026",
       "funder": "COST Association",
-      "programme": null,
+      "programme": "COST Actions",
       "status": "open",
       "opens": "2026-07-31T12:00:00+02:00",
       "deadline": "2026-10-28T12:00:00+01:00",
@@ -42,15 +58,16 @@
       "execution_risk": 0.72,
       "funding_note": "Network/action funding rather than conventional project R&D budget.",
       "next_action": "Assess feasibility of a Digital Commons Governance network and identify proposers across COST countries.",
-      "dossier": "https://github.com/Exergism-Commons/funding/blob/main/programmes/cost/open-call-2026.md",
+      "dossier": "https://github.com/Exergism-Commons/funding/blob/main/opportunities/cost-open-call-2026.md",
       "source": "https://www.cost.eu/funding/open-call-a-simple-one-step-application-process/"
     },
     {
       "id": "dc-edic-engagement",
+      "kind": "strategic_engagement",
       "name": "Digital Commons EDIC engagement",
       "funder": null,
       "programme": "Digital Commons European Digital Infrastructure Consortium",
-      "status": "strategic_network",
+      "status": "continuous",
       "opens": null,
       "deadline": null,
       "geography": "Europe",
@@ -66,13 +83,14 @@
       "capture_risk": 0.05,
       "admin_cost": 0.2,
       "execution_risk": 0.18,
-      "funding_note": "Not itself recorded here as a single grant call; strategic access point to funding pathways, incubation, legal/technical expertise and cross-border digital-commons projects.",
+      "funding_note": "Not itself a grant call; strategic access point to funding pathways, incubation, legal/technical expertise and cross-border digital-commons projects.",
       "next_action": "Map contact/participation routes and prepare a concise EC institutional dossier for engagement.",
       "dossier": "https://github.com/Exergism-Commons/funding/blob/main/partnerships/digital-commons-edic.md",
       "source": "https://digital-strategy.ec.europa.eu/en/policies/edic"
     },
     {
       "id": "msca-pf-2027",
+      "kind": "funding_call",
       "name": "MSCA Postdoctoral Fellowships 2027",
       "funder": "European Commission",
       "programme": "Horizon Europe / MSCA",
@@ -94,11 +112,12 @@
       "execution_risk": 0.62,
       "funding_note": "Unit-contribution fellowship; exact EC project amount depends on duration, country coefficient and applicable allowances.",
       "next_action": "Identify eligible postdoctoral researcher, supervision architecture and a research project aligned with EC.",
-      "dossier": "https://github.com/Exergism-Commons/funding/blob/main/programmes/msca/postdoctoral-fellowships-2027.md",
+      "dossier": "https://github.com/Exergism-Commons/funding/blob/main/opportunities/msca-pf-2027.md",
       "source": "https://marie-sklodowska-curie-actions.ec.europa.eu/funding/msca-postdoctoral-fellowships-2027"
     },
     {
       "id": "nlnet-2026-09",
+      "kind": "funding_call",
       "name": "NLnet Foundation calls — September 2026",
       "funder": "NLnet Foundation",
       "programme": "NLnet open technology grants",
@@ -120,7 +139,7 @@
       "execution_risk": 0.28,
       "funding_note": "First grants accept requests from EUR 5,000 to EUR 50,000.",
       "next_action": "Scope the NLnet Restack proposal into one concrete technical deliverable with measurable milestones and a defensible budget.",
-      "dossier": "https://github.com/Exergism-Commons/funding/blob/main/opportunities/active/nlnet-2026-09.md",
+      "dossier": "https://github.com/Exergism-Commons/funding/blob/main/opportunities/nlnet-2026-09.md",
       "source": "https://nlnet.nl/propose/"
     }
   ]
