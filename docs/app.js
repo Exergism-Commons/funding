@@ -4,6 +4,12 @@ wordmarkStylesheet.href = 'wordmark.css';
 wordmarkStylesheet.dataset.commonsWordmark = '';
 document.head.appendChild(wordmarkStylesheet);
 
+const siteBrand = document.querySelector('.site-header .brand');
+if (siteBrand) {
+  siteBrand.setAttribute('href', '/');
+  siteBrand.setAttribute('aria-label', 'Funding home');
+}
+
 const state = { opportunities: [], filter: 'all', query: '' };
 
 const positiveDimensions = ['fit','funding_value','capability_value','strategic_optionality','autonomy_value','network_value','recurrence'];
