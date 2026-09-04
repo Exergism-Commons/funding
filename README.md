@@ -127,7 +127,7 @@ See `strategy/funding-strategy.md` and `strategy/anti-capture-policy.md` for the
 
 ## Current priorities
 
-1. NLnet calls opening 2026-09-03 — identify a concrete open-technology proposal.
+1. NLnet September 2026 call — open until 2026-11-03 12:00 CET; first grants accept EUR 5,000–50,000; scope and cost the Restack proposal.
 2. Digital Commons EDIC — establish EC as a visible stakeholder in the European digital-commons network.
 3. Horizon Europe 2027 — enter consortia where EC can own governance/IP/semantics/commons work.
 4. MSCA Postdoctoral Fellowships 2027 — assess EC as a host organisation and identify suitable researcher/supervision architecture.
