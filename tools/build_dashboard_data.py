@@ -28,6 +28,8 @@ NEGATIVE_DIMENSIONS = ["capture_risk", "admin_cost", "execution_risk"]
 DISPLAY_OVERRIDES = {
     "horizon_europe": "Horizon Europe",
 }
+ALLOWED_KINDS = {"funding_call", "network_call", "strategic_engagement"}
+ALLOWED_STATUSES = {"forthcoming", "open", "continuous", "closed", "cancelled"}
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -66,14 +68,23 @@ def build_opportunities() -> dict[str, Any]:
     for opportunity in source.get("opportunities", []):
         if not isinstance(opportunity, dict):
             raise ValueError("Every opportunity must be a mapping")
+
+        kind = opportunity.get("kind")
+        status = opportunity.get("status")
+        if kind not in ALLOWED_KINDS:
+            raise ValueError(f"{opportunity.get('id')}: invalid opportunity kind {kind!r}")
+        if status not in ALLOWED_STATUSES:
+            raise ValueError(f"{opportunity.get('id')}: invalid opportunity status {status!r}")
+
         sources = opportunity.get("sources") or []
         funding = opportunity.get("funding") or {}
         row = {
             "id": opportunity["id"],
+            "kind": kind,
             "name": opportunity["name"],
             "funder": opportunity.get("funder"),
             "programme": opportunity.get("programme"),
-            "status": scalar(opportunity.get("status")),
+            "status": status,
             "opens": scalar(opportunity.get("opens")),
             "deadline": scalar(opportunity.get("deadline")),
             "geography": humanize(opportunity.get("geography")),
@@ -89,8 +100,13 @@ def build_opportunities() -> dict[str, Any]:
 
     rows.sort(key=lambda item: item["id"])
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "updated": scalar(source.get("updated")),
+        "classification": {
+            "kinds": sorted(ALLOWED_KINDS),
+            "statuses": sorted(ALLOWED_STATUSES),
+            "description": "Kind, lifecycle status and EC priority are independent classification axes.",
+        },
         "heuristic": {
             "positive_dimensions": POSITIVE_DIMENSIONS,
             "negative_dimensions": NEGATIVE_DIMENSIONS,
@@ -109,6 +125,7 @@ def build_proposals() -> dict[str, Any]:
         rows.append(
             {
                 "id": proposal["id"],
+                "opportunity_id": proposal.get("opportunity_id"),
                 "title": proposal["title"],
                 "funder": proposal.get("funder"),
                 "fund": proposal.get("fund"),
@@ -131,7 +148,7 @@ def build_proposals() -> dict[str, Any]:
     rows.sort(key=lambda item: item["id"])
     updated_values = [row["updated"] for row in rows if row.get("updated")]
     return {
-        "schema_version": 1,
+        "schema_version": 2,
         "updated": max(updated_values) if updated_values else None,
         "proposals": rows,
     }
