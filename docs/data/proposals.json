@@ -1,6 +1,20 @@
 {
   "schema_version": 3,
   "updated": "2026-09-04",
+  "classification": {
+    "statuses": [
+      "awarded",
+      "drafting",
+      "rejected",
+      "scoping",
+      "submitted"
+    ],
+    "terminal_statuses": [
+      "awarded",
+      "rejected"
+    ],
+    "description": "Proposal lifecycle states are controlled; terminal states are excluded from the active dashboard view."
+  },
   "proposals": [
     {
       "id": "nlnet-restack-2026",
