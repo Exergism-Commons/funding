@@ -3,6 +3,7 @@ proposalStylesheet.rel = 'stylesheet';
 proposalStylesheet.href = 'proposals.css';
 document.head.appendChild(proposalStylesheet);
 
+const TERMINAL_PROPOSAL_STATUSES = new Set(['awarded', 'rejected']);
 const proposalState = { proposals: [] };
 
 function proposalFormatStatus(value) {
@@ -27,6 +28,10 @@ function proposalAmount(proposal) {
 
 function proposalLink(label, href) {
   return href ? `<a class="proposal-link" href="${href}">${label} ↗</a>` : '';
+}
+
+function isActiveProposal(proposal) {
+  return !TERMINAL_PROPOSAL_STATUSES.has(String(proposal.status || '').toLowerCase());
 }
 
 function proposalTemplate(proposal) {
@@ -63,7 +68,8 @@ async function loadProposals() {
     const response = await fetch('data/proposals.json', { cache: 'no-store' });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    proposalState.proposals = Array.isArray(data.proposals) ? data.proposals : [];
+    const proposals = Array.isArray(data.proposals) ? data.proposals : [];
+    proposalState.proposals = proposals.filter(isActiveProposal);
     grid.innerHTML = proposalState.proposals.map(proposalTemplate).join('');
     empty.hidden = proposalState.proposals.length !== 0;
     const updated = document.querySelector('#proposal-data-updated');
