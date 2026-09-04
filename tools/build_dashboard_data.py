@@ -56,9 +56,26 @@ def humanize(value: Any) -> Any:
 
 
 def github_blob(path: str | None) -> str | None:
+    """Return a GitHub blob URL only for an existing file inside this repository."""
     if not path:
         return None
-    return REPOSITORY_BLOB_BASE + path.lstrip("/")
+    if not isinstance(path, str):
+        raise ValueError(f"Repository path must be a string, got {type(path).__name__}")
+
+    relative = Path(path)
+    if relative.is_absolute():
+        raise ValueError(f"Repository path must be relative: {path!r}")
+
+    target = (ROOT / relative).resolve()
+    try:
+        normalized = target.relative_to(ROOT)
+    except ValueError as exc:
+        raise ValueError(f"Repository path escapes the repository root: {path!r}") from exc
+
+    if not target.is_file():
+        raise ValueError(f"Repository path does not resolve to an existing file: {path!r}")
+
+    return REPOSITORY_BLOB_BASE + normalized.as_posix()
 
 
 def display_path(path: Path) -> str:
@@ -137,6 +154,7 @@ def build_opportunities() -> dict[str, Any]:
 
 def build_proposals() -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
+    proposal_ids: set[str] = set()
     metadata_files = sorted((ROOT / "proposals").glob("*/proposal.yaml"))
     opportunity_source = load_yaml(ROOT / "data" / "opportunities.yaml")
     opportunities = opportunity_index(opportunity_source)
@@ -144,6 +162,16 @@ def build_proposals() -> dict[str, Any]:
     for path in metadata_files:
         proposal = load_yaml(path)
         proposal_id = proposal.get("id")
+        if not isinstance(proposal_id, str) or not proposal_id:
+            raise ValueError(f"{path}: proposal must have a non-empty string id")
+        if proposal_id != path.parent.name:
+            raise ValueError(
+                f"{path}: proposal id {proposal_id!r} must match directory name {path.parent.name!r}"
+            )
+        if proposal_id in proposal_ids:
+            raise ValueError(f"Duplicate proposal id: {proposal_id}")
+        proposal_ids.add(proposal_id)
+
         opportunity_id = proposal.get("opportunity_id")
         if not isinstance(opportunity_id, str) or not opportunity_id:
             raise ValueError(f"{proposal_id}: proposal must reference an opportunity_id")
@@ -154,7 +182,7 @@ def build_proposals() -> dict[str, Any]:
         sources = opportunity.get("sources") or []
         rows.append(
             {
-                "id": proposal["id"],
+                "id": proposal_id,
                 "opportunity_id": opportunity_id,
                 "title": proposal["title"],
                 "funder": opportunity.get("funder"),
