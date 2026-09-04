@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "updated": "2026-09-04",
+  "proposals": [
+    {
+      "id": "nlnet-restack-2026",
+      "title": "NLnet Restack 2026 — Exergism Commons",
+      "funder": "NLnet Foundation",
+      "fund": "Restack Fund",
+      "status": "scoping",
+      "updated": "2026-09-04",
+      "deadline": "2026-11-03T12:00:00+01:00",
+      "currency": "EUR",
+      "requested_amount": null,
+      "summary": "First-grant proposal under development. The technical scope and requested amount remain intentionally unset until the funded deliverable is selected and costed.",
+      "next_action": "Select the concrete technical deliverable, define measurable milestones, then cost the work against NLnet's first-grant range.",
+      "links": {
+        "proposal": "https://github.com/Exergism-Commons/funding/blob/main/proposals/nlnet-restack-2026/proposal.md",
+        "budget": "https://github.com/Exergism-Commons/funding/blob/main/proposals/nlnet-restack-2026/budget.md",
+        "provenance": "https://github.com/Exergism-Commons/funding/blob/main/proposals/nlnet-restack-2026/ai-provenance.md",
+        "source": "https://nlnet.nl/propose/"
+      }
+    }
+  ]
+}
