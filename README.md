@@ -97,10 +97,9 @@ See `spec/MACHINE-READABLE-GOVERNANCE.md`.
 ## Repository structure
 
 - `strategy/` — portfolio design, independence, treasury, Endowment and compensation principles.
-- `opportunities/` — actionable calls and monitored opportunities.
-- `programmes/` — persistent knowledge about recurring funding programmes.
+- `opportunities/` — stable dossiers for actionable calls and monitored opportunities.
 - `partnerships/` — strategic networks and institutions relevant to funding and expansion.
-- `proposals/` — proposal work products when appropriate for public development.
+- `proposals/` — EC proposal work products linked to opportunities where applicable.
 - `data/` — canonical structured opportunity registry.
 - `knowledge/` — canonical Git-native JSON-LD governance records.
 - `ontology/` — OWL TBox, JSON-LD context and SHACL constraints.
@@ -108,6 +107,8 @@ See `spec/MACHINE-READABLE-GOVERNANCE.md`.
 - `tools/` — deterministic graph builders and integrity tooling.
 - `tests/` — positive and adversarial governance fixtures.
 - `docs/` — static public dashboard served at `funding.exergism.org`.
+
+External programme names remain metadata on opportunities; they are not modeled as a separate repository object unless a concrete future use requires it.
 
 ## Evaluation principle
 
