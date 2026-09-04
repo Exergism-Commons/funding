@@ -30,6 +30,8 @@ DISPLAY_OVERRIDES = {
 }
 ALLOWED_KINDS = {"funding_call", "network_call", "strategic_engagement"}
 ALLOWED_STATUSES = {"forthcoming", "open", "continuous", "closed", "cancelled"}
+ALLOWED_PROPOSAL_STATUSES = {"scoping", "drafting", "submitted", "awarded", "rejected"}
+TERMINAL_PROPOSAL_STATUSES = {"awarded", "rejected"}
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -172,6 +174,12 @@ def build_proposals() -> dict[str, Any]:
             raise ValueError(f"Duplicate proposal id: {proposal_id}")
         proposal_ids.add(proposal_id)
 
+        status = proposal.get("status")
+        if not isinstance(status, str) or not status:
+            raise ValueError(f"{proposal_id}: proposal must have a non-empty string status")
+        if status not in ALLOWED_PROPOSAL_STATUSES:
+            raise ValueError(f"{proposal_id}: invalid proposal status {status!r}")
+
         opportunity_id = proposal.get("opportunity_id")
         if not isinstance(opportunity_id, str) or not opportunity_id:
             raise ValueError(f"{proposal_id}: proposal must reference an opportunity_id")
@@ -187,7 +195,7 @@ def build_proposals() -> dict[str, Any]:
                 "title": proposal["title"],
                 "funder": opportunity.get("funder"),
                 "fund": proposal.get("fund"),
-                "status": scalar(proposal.get("status")),
+                "status": status,
                 "updated": scalar(proposal.get("updated")),
                 "deadline": scalar(opportunity.get("deadline")),
                 "currency": proposal.get("currency", "EUR"),
@@ -208,6 +216,11 @@ def build_proposals() -> dict[str, Any]:
     return {
         "schema_version": 3,
         "updated": max(updated_values) if updated_values else None,
+        "classification": {
+            "statuses": sorted(ALLOWED_PROPOSAL_STATUSES),
+            "terminal_statuses": sorted(TERMINAL_PROPOSAL_STATUSES),
+            "description": "Proposal lifecycle states are controlled; terminal states are excluded from the active dashboard view.",
+        },
         "proposals": rows,
     }
 
