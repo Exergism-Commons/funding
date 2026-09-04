@@ -1,5 +1,6 @@
-schema_version: 1
+schema_version: 2
 id: nlnet-restack-2026
+opportunity_id: nlnet-2026-09
 title: "NLnet Restack 2026 — Exergism Commons"
 funder: NLnet Foundation
 fund: Restack Fund
