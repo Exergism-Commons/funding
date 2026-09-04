@@ -24,6 +24,16 @@ A **proposal** is EC's concrete response to an opportunity. Proposals live under
 
 One opportunity may produce zero, one or multiple proposals. A proposal is therefore never the canonical source for call-level facts. Proposal metadata MUST NOT duplicate opportunity-owned facts such as the external funder, call deadline or primary call source. Public proposal projections resolve those values through `opportunity_id`, and generation MUST fail when the referenced opportunity does not exist.
 
+Proposal lifecycle state is a controlled value. Current values are:
+
+- `scoping` — the funded deliverable, amount or milestones are still being selected;
+- `drafting` — the proposal is being actively prepared;
+- `submitted` — the application has been submitted and is awaiting an outcome;
+- `awarded` — the proposal succeeded;
+- `rejected` — the proposal did not succeed.
+
+`awarded` and `rejected` are terminal states and MUST NOT appear in the dashboard section labelled “Active proposals”. Unknown, missing or misspelled proposal states MUST fail projection generation instead of being treated as active.
+
 ### Partnership
 
 A **partnership** is a durable institutional relationship or strategic network object, not necessarily a funding call. Partnership knowledge belongs under `partnerships/`.
@@ -56,7 +66,7 @@ Current controlled values:
 - `closed`
 - `cancelled`
 
-Proposal-specific states such as `scoping`, `drafting`, `submitted`, `awarded` or `rejected` belong to proposal metadata, not opportunity metadata.
+Proposal-specific lifecycle values are defined separately under the Proposal object and belong to proposal metadata, not opportunity metadata.
 
 ### `priority`
 
