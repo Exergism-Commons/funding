@@ -1,3 +1,8 @@
+const proposalStylesheet = document.createElement('link');
+proposalStylesheet.rel = 'stylesheet';
+proposalStylesheet.href = 'proposals.css';
+document.head.appendChild(proposalStylesheet);
+
 const proposalState = { proposals: [] };
 
 function proposalFormatStatus(value) {
