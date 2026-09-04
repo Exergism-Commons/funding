@@ -19,6 +19,7 @@
   <title>Exergism Commons — Funding</title>
   <link rel="stylesheet" href="styles.css">
   <script src="app.js" defer></script>
+  <script src="proposals.js" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
@@ -36,6 +37,7 @@
       <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-nav">Menu</button>
       <nav id="primary-nav" class="nav" aria-label="Primary navigation">
         <a href="#pipeline">Pipeline</a>
+        <a href="#proposals">Proposals</a>
         <a href="#independence">Independence</a>
         <a href="#model">Model</a>
         <a href="#endowment">Endowment</a>
@@ -122,10 +124,24 @@
       </div>
     </section>
 
+    <section class="section section-proposals" id="proposals">
+      <div class="shell">
+        <div class="section-heading split-heading">
+          <div>
+            <p class="eyebrow">02 · Active proposals</p>
+            <h2>Applications under construction.</h2>
+          </div>
+          <p>Proposal state is generated from canonical Git-tracked metadata. Narrative, budget and provenance remain inspectable in the repository instead of being maintained as a second private copy.</p>
+        </div>
+        <div id="proposal-grid" class="proposal-grid" aria-live="polite"></div>
+        <p id="proposal-empty-state" class="empty-state" hidden>No active proposals are currently recorded.</p>
+      </div>
+    </section>
+
     <section class="section" id="independence">
       <div class="shell">
         <div class="section-heading">
-          <p class="eyebrow">02 · Anti-capture architecture</p>
+          <p class="eyebrow">03 · Anti-capture architecture</p>
           <h2>Capital without surrendering the institution.</h2>
           <p>Funding is useful only if it leaves EC with more durable agency than before. These safeguards make dependence visible and external control expensive.</p>
         </div>
@@ -158,7 +174,7 @@
     <section class="section identity-section" id="model">
       <div class="shell model-grid">
         <div class="section-heading sticky-heading">
-          <p class="eyebrow">03 · Capital model</p>
+          <p class="eyebrow">04 · Capital model</p>
           <h2>Multiple engines. No single lifeline.</h2>
           <p>The desired architecture mixes external funding, flexible income, liquid resilience and permanent capital so that no programme becomes synonymous with EC's survival.</p>
         </div>
@@ -191,7 +207,7 @@
     <section class="section" id="endowment">
       <div class="shell">
         <div class="section-heading">
-          <p class="eyebrow">04 · Permanent capital</p>
+          <p class="eyebrow">05 · Permanent capital</p>
           <h2>The EC Endowment.</h2>
           <p>A long-term pool of institutional capital designed to make EC progressively less dependent on grants, donors, sponsors, customers and political cycles.</p>
         </div>
@@ -230,7 +246,7 @@
     <section class="section section-network" id="network">
       <div class="shell network-grid">
         <div>
-          <p class="eyebrow">05 · Network capital</p>
+          <p class="eyebrow">06 · Network capital</p>
           <h2>Funding is also a graph.</h2>
           <p class="network-copy">The repository tracks institutions that can expand EC's opportunity surface: research hosts, public bodies, digital-commons networks, open-source funders and future consortium partners. A useful relationship can be worth more than a one-off grant.</p>
         </div>
@@ -256,7 +272,7 @@
         <div>
           <p class="eyebrow">Work in public</p>
           <h2>Build capital without creating owners.</h2>
-          <p>Opportunity dossiers, treasury rules, Endowment safeguards, compensation principles and anti-capture architecture live in the public repository.</p>
+          <p>Opportunity dossiers, proposal work, treasury rules, Endowment safeguards, compensation principles and anti-capture architecture live in the public repository.</p>
         </div>
         <div class="cta-actions">
           <a class="button button-primary" href="https://github.com/Exergism-Commons/funding">Open repository</a>
@@ -286,7 +302,7 @@
     <div class="shell footer-bottom">
       <span>© 2026 Exergism Commons</span>
       <span>Funding, compensation and Endowment decisions remain subject to EC governance and applicable legal conditions.</span>
-      <span>Data last structured: <span id="data-updated">—</span></span>
+      <span>Opportunity data: <span id="data-updated">—</span> · Proposal data: <span id="proposal-data-updated">—</span></span>
     </div>
   </footer>
 </body>
