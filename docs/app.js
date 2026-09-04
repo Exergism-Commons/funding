@@ -1,3 +1,9 @@
+const wordmarkStylesheet = document.createElement('link');
+wordmarkStylesheet.rel = 'stylesheet';
+wordmarkStylesheet.href = 'wordmark.css';
+wordmarkStylesheet.dataset.commonsWordmark = '';
+document.head.appendChild(wordmarkStylesheet);
+
 const state = { opportunities: [], filter: 'all', query: '' };
 
 const positiveDimensions = ['fit','funding_value','capability_value','strategic_optionality','autonomy_value','network_value','recurrence'];
