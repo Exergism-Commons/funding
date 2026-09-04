@@ -3,7 +3,7 @@ proposalStylesheet.rel = 'stylesheet';
 proposalStylesheet.href = 'proposals.css';
 document.head.appendChild(proposalStylesheet);
 
-const TERMINAL_PROPOSAL_STATUSES = new Set(['awarded', 'rejected']);
+const DEFAULT_TERMINAL_PROPOSAL_STATUSES = ['awarded', 'rejected'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 const proposalState = { proposals: [] };
 
@@ -56,8 +56,8 @@ function proposalLink(label, href) {
   return link;
 }
 
-function isActiveProposal(proposal) {
-  return !TERMINAL_PROPOSAL_STATUSES.has(String(proposal.status || '').toLowerCase());
+function isActiveProposal(proposal, terminalStatuses) {
+  return !terminalStatuses.has(String(proposal.status || '').toLowerCase());
 }
 
 function proposalMetaItem(label, value) {
@@ -135,7 +135,13 @@ async function loadProposals() {
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     const proposals = Array.isArray(data.proposals) ? data.proposals : [];
-    proposalState.proposals = proposals.filter(isActiveProposal);
+    const configuredTerminalStatuses = Array.isArray(data.classification?.terminal_statuses)
+      ? data.classification.terminal_statuses
+      : DEFAULT_TERMINAL_PROPOSAL_STATUSES;
+    const terminalStatuses = new Set(
+      configuredTerminalStatuses.map((status) => String(status).toLowerCase()),
+    );
+    proposalState.proposals = proposals.filter((proposal) => isActiveProposal(proposal, terminalStatuses));
     grid.replaceChildren(...proposalState.proposals.map(proposalElement));
     empty.hidden = proposalState.proposals.length !== 0;
     const updated = document.querySelector('#proposal-data-updated');
