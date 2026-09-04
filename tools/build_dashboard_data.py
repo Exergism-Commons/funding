@@ -61,14 +61,25 @@ def github_blob(path: str | None) -> str | None:
     return REPOSITORY_BLOB_BASE + path.lstrip("/")
 
 
+def opportunity_index(source: dict[str, Any]) -> dict[str, dict[str, Any]]:
+    index: dict[str, dict[str, Any]] = {}
+    for opportunity in source.get("opportunities", []):
+        if not isinstance(opportunity, dict):
+            raise ValueError("Every opportunity must be a mapping")
+        opportunity_id = opportunity.get("id")
+        if not isinstance(opportunity_id, str) or not opportunity_id:
+            raise ValueError("Every opportunity must have a non-empty string id")
+        if opportunity_id in index:
+            raise ValueError(f"Duplicate opportunity id: {opportunity_id}")
+        index[opportunity_id] = opportunity
+    return index
+
+
 def build_opportunities() -> dict[str, Any]:
     source = load_yaml(ROOT / "data" / "opportunities.yaml")
     rows: list[dict[str, Any]] = []
 
-    for opportunity in source.get("opportunities", []):
-        if not isinstance(opportunity, dict):
-            raise ValueError("Every opportunity must be a mapping")
-
+    for opportunity in opportunity_index(source).values():
         kind = opportunity.get("kind")
         status = opportunity.get("status")
         if kind not in ALLOWED_KINDS:
@@ -119,19 +130,30 @@ def build_opportunities() -> dict[str, Any]:
 def build_proposals() -> dict[str, Any]:
     rows: list[dict[str, Any]] = []
     metadata_files = sorted((ROOT / "proposals").glob("*/proposal.yaml"))
+    opportunity_source = load_yaml(ROOT / "data" / "opportunities.yaml")
+    opportunities = opportunity_index(opportunity_source)
 
     for path in metadata_files:
         proposal = load_yaml(path)
+        proposal_id = proposal.get("id")
+        opportunity_id = proposal.get("opportunity_id")
+        if not isinstance(opportunity_id, str) or not opportunity_id:
+            raise ValueError(f"{proposal_id}: proposal must reference an opportunity_id")
+        if opportunity_id not in opportunities:
+            raise ValueError(f"{proposal_id}: unknown opportunity_id {opportunity_id!r}")
+
+        opportunity = opportunities[opportunity_id]
+        sources = opportunity.get("sources") or []
         rows.append(
             {
                 "id": proposal["id"],
-                "opportunity_id": proposal.get("opportunity_id"),
+                "opportunity_id": opportunity_id,
                 "title": proposal["title"],
-                "funder": proposal.get("funder"),
+                "funder": opportunity.get("funder"),
                 "fund": proposal.get("fund"),
                 "status": scalar(proposal.get("status")),
                 "updated": scalar(proposal.get("updated")),
-                "deadline": scalar(proposal.get("deadline")),
+                "deadline": scalar(opportunity.get("deadline")),
                 "currency": proposal.get("currency", "EUR"),
                 "requested_amount": proposal.get("requested_amount"),
                 "summary": proposal.get("summary"),
@@ -140,7 +162,7 @@ def build_proposals() -> dict[str, Any]:
                     "proposal": github_blob(proposal.get("proposal_path")),
                     "budget": github_blob(proposal.get("budget_path")),
                     "provenance": github_blob(proposal.get("provenance_path")),
-                    "source": proposal.get("source"),
+                    "source": sources[0] if sources else None,
                 },
             }
         )
@@ -148,7 +170,7 @@ def build_proposals() -> dict[str, Any]:
     rows.sort(key=lambda item: item["id"])
     updated_values = [row["updated"] for row in rows if row.get("updated")]
     return {
-        "schema_version": 2,
+        "schema_version": 3,
         "updated": max(updated_values) if updated_values else None,
         "proposals": rows,
     }
