@@ -155,7 +155,7 @@ def build_proposals() -> dict[str, Any]:
 
 
 def encoded(payload: dict[str, Any]) -> str:
-    return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+    return json.dumps(payload, ensure_ascii=False, indent=2, allow_nan=False) + "\n"
 
 
 def emit(path: Path, payload: dict[str, Any], check: bool) -> bool:
