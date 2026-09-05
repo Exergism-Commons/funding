@@ -64,7 +64,7 @@ function formatDeadline(value) {
 }
 
 function deadlineContent(value) {
-  if (!value) return { primary: 'Continuous', secondary: 'strategic engagement' };
+  if (!value) return { primary: 'Continuous', secondary: 'no fixed deadline' };
 
   const target = new Date(value);
   const now = new Date();
