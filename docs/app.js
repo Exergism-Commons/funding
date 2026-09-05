@@ -275,16 +275,6 @@ function injectMachineGovernance() {
           </div>
         </div>
       </section>`);
-
-    const followingLabels = [
-      ['#model', '05 · Capital model'],
-      ['#endowment', '06 · Permanent capital'],
-      ['#network', '07 · Network capital'],
-    ];
-    followingLabels.forEach(([selector, label]) => {
-      const eyebrow = document.querySelector(`${selector} .eyebrow`);
-      if (eyebrow) eyebrow.textContent = label;
-    });
   }
 
   const nav = document.querySelector('#primary-nav');
