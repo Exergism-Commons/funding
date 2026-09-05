@@ -76,7 +76,8 @@ function deadlineContent(value) {
   }
 
   const diffDays = Math.ceil(remainingMs / 86400000);
-  return { primary: dateText, secondary: `${diffDays} days remaining` };
+  const dayLabel = diffDays === 1 ? 'day' : 'days';
+  return { primary: dateText, secondary: `${diffDays} ${dayLabel} remaining` };
 }
 
 function matches(opportunity) {
