@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import re
 from datetime import date, datetime
 from pathlib import Path
@@ -188,6 +189,17 @@ def build_proposals() -> dict[str, Any]:
                 f"{proposal_id}: currency must be a three-letter uppercase code, got {currency!r}"
             )
 
+        requested_amount = proposal.get("requested_amount")
+        if requested_amount is not None:
+            if isinstance(requested_amount, bool) or not isinstance(requested_amount, (int, float)):
+                raise ValueError(
+                    f"{proposal_id}: requested_amount must be null or a numeric value, got {requested_amount!r}"
+                )
+            if not math.isfinite(requested_amount) or requested_amount < 0:
+                raise ValueError(
+                    f"{proposal_id}: requested_amount must be finite and non-negative, got {requested_amount!r}"
+                )
+
         opportunity_id = proposal.get("opportunity_id")
         if not isinstance(opportunity_id, str) or not opportunity_id:
             raise ValueError(f"{proposal_id}: proposal must reference an opportunity_id")
@@ -207,7 +219,7 @@ def build_proposals() -> dict[str, Any]:
                 "updated": scalar(proposal.get("updated")),
                 "deadline": scalar(opportunity.get("deadline")),
                 "currency": currency,
-                "requested_amount": proposal.get("requested_amount"),
+                "requested_amount": requested_amount,
                 "summary": proposal.get("summary"),
                 "next_action": proposal.get("next_action"),
                 "links": {
