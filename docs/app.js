@@ -20,6 +20,7 @@ const state = { opportunities: [], filter: 'all', query: '' };
 const positiveDimensions = ['fit','funding_value','capability_value','strategic_optionality','autonomy_value','network_value','recurrence'];
 const negativeDimensions = ['capture_risk','admin_cost','execution_risk'];
 const requiredDimensions = [...positiveDimensions, ...negativeDimensions];
+const OPPORTUNITY_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function mean(values) {
   if (!values.length) return 0;
@@ -44,31 +45,47 @@ function formatStatus(value) {
   return String(value || 'unknown').replaceAll('_', ' ');
 }
 
-function formatDate(value) {
+function formatDeadline(value) {
   if (!value) return null;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return null;
-  return new Intl.DateTimeFormat('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
+
+  const text = String(value);
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2}))?$/);
+  if (!match) return null;
+
+  const [, year, month, day, hour, minute, zone] = match;
+  const monthName = OPPORTUNITY_MONTH_NAMES[Number(month) - 1];
+  if (!monthName) return null;
+
+  const dateText = `${day} ${monthName} ${year}`;
+  if (!hour || !minute || !zone) return dateText;
+
+  const zoneText = zone === 'Z' ? 'UTC' : `UTC${zone}`;
+  return `${dateText} · ${hour}:${minute} ${zoneText}`;
 }
 
-function deadlineLabel(value) {
-  if (!value) return '<strong>Continuous</strong><br>strategic engagement';
+function deadlineContent(value) {
+  if (!value) return { primary: 'Continuous', secondary: 'no fixed deadline' };
+
   const target = new Date(value);
   const now = new Date();
   const targetTime = target.getTime();
-  const dateText = formatDate(value);
+  const deadlineText = formatDeadline(value);
 
-  if (Number.isNaN(targetTime) || !dateText) return '<strong>Unknown</strong><br>deadline unavailable';
-  if (targetTime <= now.getTime()) return `<strong>${dateText}</strong><br>deadline passed`;
+  if (Number.isNaN(targetTime) || !deadlineText) {
+    return { primary: 'Unknown', secondary: 'deadline unavailable' };
+  }
 
-  const sameLocalDay = target.getFullYear() === now.getFullYear()
-    && target.getMonth() === now.getMonth()
-    && target.getDate() === now.getDate();
-  if (sameLocalDay) return `<strong>${dateText}</strong><br>due today`;
+  const remainingMs = targetTime - now.getTime();
+  if (remainingMs <= 0) {
+    return { primary: deadlineText, secondary: 'deadline passed' };
+  }
+  if (remainingMs < 86400000) {
+    return { primary: deadlineText, secondary: 'less than 24 hours remaining' };
+  }
 
-  const diffDays = Math.ceil((targetTime - now.getTime()) / 86400000);
-  if (diffDays === 1) return `<strong>${dateText}</strong><br>1 day remaining`;
-  return `<strong>${dateText}</strong><br>${diffDays} days remaining`;
+  const diffDays = Math.ceil(remainingMs / 86400000);
+  const dayLabel = diffDays === 1 ? 'day' : 'days';
+  return { primary: deadlineText, secondary: `${diffDays} ${dayLabel} remaining` };
 }
 
 function matches(opportunity) {
@@ -81,42 +98,110 @@ function matches(opportunity) {
   return priorityMatch && queryMatch;
 }
 
-function cardTemplate(opportunity) {
+function safeHttpsUrl(href) {
+  if (!href) return null;
+  try {
+    const url = new URL(String(href), window.location.href);
+    return url.protocol === 'https:' ? url.href : null;
+  } catch {
+    return null;
+  }
+}
+
+function metaBox(label, value) {
+  const box = document.createElement('div');
+  box.className = 'meta-box';
+  const labelNode = document.createElement('span');
+  const valueNode = document.createElement('strong');
+  labelNode.textContent = label;
+  valueNode.textContent = value || 'Unknown';
+  box.append(labelNode, valueNode);
+  return box;
+}
+
+function opportunityElement(opportunity) {
   const signal = institutionalSignal(opportunity);
   const ranked = signal !== null;
   const percent = ranked ? Math.round(signal * 100) : null;
-  const sourceLink = opportunity.dossier || opportunity.source;
   const scoreValue = ranked ? `${percent}/100` : 'Not ranked';
   const scoreTitle = ranked
     ? 'Non-binding EIV heuristic'
     : 'Missing or invalid required EIV dimensions; excluded from automated ranking';
   const scoreWidth = ranked ? percent : 0;
-  return `
-    <article class="opportunity-card" data-priority="${opportunity.priority}">
-      <div class="card-top">
-        <span class="priority" data-priority="${opportunity.priority}">${opportunity.priority}</span>
-        <span class="card-status">${formatStatus(opportunity.status)}</span>
-      </div>
-      <h3>${opportunity.name}</h3>
-      <p class="card-funder">${opportunity.funder || opportunity.programme}</p>
 
-      <div class="card-meta">
-        <div class="meta-box"><span>EC role</span><strong>${opportunity.ec_role}</strong></div>
-        <div class="meta-box"><span>Geography</span><strong>${opportunity.geography}</strong></div>
-      </div>
+  const article = document.createElement('article');
+  article.className = 'opportunity-card';
+  article.dataset.priority = String(opportunity.priority || '');
 
-      <div class="eiv-wrap">
-        <div class="eiv-row"><span>Institutional value signal</span><strong>${scoreValue}</strong></div>
-        <div class="eiv-track" title="${scoreTitle}"><span style="width:${scoreWidth}%"></span></div>
-      </div>
+  const top = document.createElement('div');
+  top.className = 'card-top';
+  const priority = document.createElement('span');
+  priority.className = 'priority';
+  priority.dataset.priority = String(opportunity.priority || '');
+  priority.textContent = opportunity.priority || '—';
+  const status = document.createElement('span');
+  status.className = 'card-status';
+  status.textContent = formatStatus(opportunity.status);
+  top.append(priority, status);
 
-      <p class="card-next"><strong>Next:</strong> ${opportunity.next_action}</p>
+  const title = document.createElement('h3');
+  title.textContent = opportunity.name || 'Untitled opportunity';
 
-      <div class="card-actions">
-        <a class="card-link" href="${sourceLink}">Open dossier ↗</a>
-        <span class="deadline">${deadlineLabel(opportunity.deadline)}</span>
-      </div>
-    </article>`;
+  const funder = document.createElement('p');
+  funder.className = 'card-funder';
+  funder.textContent = opportunity.funder || opportunity.programme || 'Unknown';
+
+  const meta = document.createElement('div');
+  meta.className = 'card-meta';
+  meta.append(
+    metaBox('EC role', opportunity.ec_role),
+    metaBox('Geography', opportunity.geography),
+  );
+
+  const eivWrap = document.createElement('div');
+  eivWrap.className = 'eiv-wrap';
+  const eivRow = document.createElement('div');
+  eivRow.className = 'eiv-row';
+  const eivLabel = document.createElement('span');
+  eivLabel.textContent = 'Institutional value signal';
+  const eivValue = document.createElement('strong');
+  eivValue.textContent = scoreValue;
+  eivRow.append(eivLabel, eivValue);
+  const eivTrack = document.createElement('div');
+  eivTrack.className = 'eiv-track';
+  eivTrack.title = scoreTitle;
+  const eivBar = document.createElement('span');
+  eivBar.style.width = `${scoreWidth}%`;
+  eivTrack.appendChild(eivBar);
+  eivWrap.append(eivRow, eivTrack);
+
+  const next = document.createElement('p');
+  next.className = 'card-next';
+  const nextLabel = document.createElement('strong');
+  nextLabel.textContent = 'Next:';
+  next.append(nextLabel, document.createTextNode(` ${opportunity.next_action || 'No next action recorded.'}`));
+
+  const actions = document.createElement('div');
+  actions.className = 'card-actions';
+  const sourceLink = safeHttpsUrl(opportunity.dossier || opportunity.source);
+  if (sourceLink) {
+    const link = document.createElement('a');
+    link.className = 'card-link';
+    link.href = sourceLink;
+    link.textContent = 'Open dossier ↗';
+    actions.appendChild(link);
+  }
+
+  const deadline = document.createElement('span');
+  deadline.className = 'deadline';
+  const deadlineValue = deadlineContent(opportunity.deadline);
+  const deadlinePrimary = document.createElement('strong');
+  deadlinePrimary.textContent = deadlineValue.primary;
+  deadline.append(deadlinePrimary, document.createElement('br'), document.createTextNode(deadlineValue.secondary));
+  actions.appendChild(deadline);
+
+  article.append(top, title, funder, meta, eivWrap, next, actions);
+  return article;
 }
 
 function compareByInstitutionalSignal(a, b) {
@@ -135,7 +220,7 @@ function render() {
     .filter(matches)
     .sort(compareByInstitutionalSignal);
 
-  grid.innerHTML = visible.map(cardTemplate).join('');
+  grid.replaceChildren(...visible.map(opportunityElement));
   empty.hidden = visible.length !== 0;
 }
 
@@ -149,7 +234,10 @@ async function loadData() {
     document.querySelector('#data-updated').textContent = data.updated || 'unknown';
     render();
   } catch (error) {
-    grid.innerHTML = '<p class="empty-state">Opportunity data could not be loaded. Use the public GitHub repository as the source of truth.</p>';
+    const message = document.createElement('p');
+    message.className = 'empty-state';
+    message.textContent = 'Opportunity data could not be loaded. Use the public GitHub repository as the source of truth.';
+    grid.replaceChildren(message);
     console.error('Funding data load failed:', error);
   }
 }
@@ -163,7 +251,7 @@ function injectMachineGovernance() {
       <section class="section" id="machine-governance">
         <div class="shell">
           <div class="section-heading">
-            <p class="eyebrow">03 · Executable governance</p>
+            <p class="eyebrow">04 · Executable governance</p>
             <h2>Policy that can be inspected by machines.</h2>
             <p>Funding governance is represented as an auditable semantic stack. Code validates explicit institutional state; it does not replace the competent EC body, statutes or applicable law.</p>
           </div>

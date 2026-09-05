@@ -1,7 +1,9 @@
 # MSCA Postdoctoral Fellowships 2027
 
-**Call:** HORIZON-MSCA-2027-PF-01  
+**Kind:** funding call  
+**Priority:** P1  
 **Status:** forthcoming  
+**Call:** HORIZON-MSCA-2027-PF-01  
 **Opening:** 2027-04-07  
 **Deadline:** 2027-09-08 17:00 CEST  
 **Indicative budget:** EUR 388.57 million (TBC)  

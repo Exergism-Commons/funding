@@ -1,0 +1,14 @@
+schema_version: 3
+id: nlnet-restack-2026
+opportunity_id: nlnet-2026-09
+title: "NLnet Restack 2026 — Exergism Commons"
+fund: Restack Fund
+status: scoping
+updated: 2026-09-04
+currency: EUR
+requested_amount: null
+summary: "First-grant proposal under development. The technical scope and requested amount remain intentionally unset until the funded deliverable is selected and costed."
+next_action: "Select the concrete technical deliverable, define measurable milestones, then cost the work against NLnet's first-grant range."
+proposal_path: proposals/nlnet-restack-2026/proposal.md
+budget_path: proposals/nlnet-restack-2026/budget.md
+provenance_path: proposals/nlnet-restack-2026/ai-provenance.md

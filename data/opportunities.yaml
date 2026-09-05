@@ -1,6 +1,19 @@
-schema_version: 2
-updated: 2026-09-02
+schema_version: 3
+updated: 2026-09-04
 currency_default: EUR
+
+classification:
+  kinds:
+    funding_call: "Dated call that can directly finance work."
+    network_call: "Dated call primarily aimed at building or financing a network/action."
+    strategic_engagement: "Concrete institutional/network route without a conventional grant call."
+  statuses:
+    - forthcoming
+    - open
+    - continuous
+    - closed
+    - cancelled
+  note: "Kind, lifecycle status and EC priority are independent axes. Physical dossier paths do not encode lifecycle state."
 
 scoring:
   scale: "0.0-1.0"
@@ -22,17 +35,18 @@ scoring:
 
 opportunities:
   - id: nlnet-2026-09
+    kind: funding_call
     name: NLnet Foundation calls — September 2026
     funder: NLnet Foundation
     programme: NLnet open technology grants
-    status: opening
+    status: open
     opens: 2026-09-03
     deadline: 2026-11-03T12:00:00+01:00
     geography: international
     funding:
-      min: null
-      max: null
-      note: "Call-specific amount to be confirmed when calls reopen; prior NLnet/NGI Zero calls commonly used EUR 5k–50k ranges."
+      min: 5000
+      max: 50000
+      note: "First grants accept requests from EUR 5,000 to EUR 50,000."
     ec_role: direct_applicant
     fit: 0.95
     funding_value: 0.58
@@ -45,13 +59,16 @@ opportunities:
     network_value: 0.65
     recurrence: 0.80
     priority: P0
-    next_action: "Select one concrete EC technical deliverable and prepare proposal after call-specific guides publish."
+    next_action: "Scope the NLnet Restack proposal into one concrete technical deliverable with measurable milestones and a defensible budget."
+    dossier_path: opportunities/nlnet-2026-09.md
     sources:
       - https://nlnet.nl/propose/
 
   - id: cost-open-call-2026
+    kind: network_call
     name: COST Open Call 2026
     funder: COST Association
+    programme: COST Actions
     status: open
     opens: 2026-07-31T12:00:00+02:00
     deadline: 2026-10-28T12:00:00+01:00
@@ -71,10 +88,12 @@ opportunities:
     recurrence: 0.65
     priority: P1
     next_action: "Assess feasibility of a Digital Commons Governance network and identify proposers across COST countries."
+    dossier_path: opportunities/cost-open-call-2026.md
     sources:
       - https://www.cost.eu/funding/open-call-a-simple-one-step-application-process/
 
   - id: msca-pf-2027
+    kind: funding_call
     name: MSCA Postdoctoral Fellowships 2027
     funder: European Commission
     programme: Horizon Europe / MSCA
@@ -98,17 +117,19 @@ opportunities:
     recurrence: 0.70
     priority: P1
     next_action: "Identify eligible postdoctoral researcher, supervision architecture and a research project aligned with EC."
+    dossier_path: opportunities/msca-pf-2027.md
     sources:
       - https://marie-sklodowska-curie-actions.ec.europa.eu/funding/msca-postdoctoral-fellowships-2027
 
   - id: dc-edic-engagement
+    kind: strategic_engagement
     name: Digital Commons EDIC engagement
     funder: null
     programme: Digital Commons European Digital Infrastructure Consortium
-    status: strategic_network
+    status: continuous
     geography: europe
     funding:
-      note: "Not itself recorded here as a single grant call; strategic access point to funding pathways, incubation, legal/technical expertise and cross-border digital-commons projects."
+      note: "Not itself a grant call; strategic access point to funding pathways, incubation, legal/technical expertise and cross-border digital-commons projects."
     ec_role: stakeholder_partner
     fit: 1.00
     funding_value: 0.35
@@ -122,5 +143,6 @@ opportunities:
     recurrence: 1.00
     priority: P0
     next_action: "Map contact/participation routes and prepare a concise EC institutional dossier for engagement."
+    dossier_path: partnerships/digital-commons-edic.md
     sources:
       - https://digital-strategy.ec.europa.eu/en/policies/edic

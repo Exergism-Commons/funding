@@ -97,10 +97,9 @@ See `spec/MACHINE-READABLE-GOVERNANCE.md`.
 ## Repository structure
 
 - `strategy/` — portfolio design, independence, treasury, Endowment and compensation principles.
-- `opportunities/` — actionable calls and monitored opportunities.
-- `programmes/` — persistent knowledge about recurring funding programmes.
+- `opportunities/` — stable dossiers for actionable calls and monitored opportunities.
 - `partnerships/` — strategic networks and institutions relevant to funding and expansion.
-- `proposals/` — proposal work products when appropriate for public development.
+- `proposals/` — EC proposal work products linked to opportunities where applicable.
 - `data/` — canonical structured opportunity registry.
 - `knowledge/` — canonical Git-native JSON-LD governance records.
 - `ontology/` — OWL TBox, JSON-LD context and SHACL constraints.
@@ -108,6 +107,8 @@ See `spec/MACHINE-READABLE-GOVERNANCE.md`.
 - `tools/` — deterministic graph builders and integrity tooling.
 - `tests/` — positive and adversarial governance fixtures.
 - `docs/` — static public dashboard served at `funding.exergism.org`.
+
+External programme names remain metadata on opportunities; they are not modeled as a separate repository object unless a concrete future use requires it.
 
 ## Evaluation principle
 
@@ -127,7 +128,7 @@ See `strategy/funding-strategy.md` and `strategy/anti-capture-policy.md` for the
 
 ## Current priorities
 
-1. NLnet calls opening 2026-09-03 — identify a concrete open-technology proposal.
+1. NLnet September 2026 call — open until 2026-11-03 12:00 CET; first grants accept EUR 5,000–50,000; scope and cost the Restack proposal.
 2. Digital Commons EDIC — establish EC as a visible stakeholder in the European digital-commons network.
 3. Horizon Europe 2027 — enter consortia where EC can own governance/IP/semantics/commons work.
 4. MSCA Postdoctoral Fellowships 2027 — assess EC as a host organisation and identify suitable researcher/supervision architecture.

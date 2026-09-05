@@ -1,5 +1,7 @@
 # COST Open Call 2026
 
+**Kind:** network call  
+**Priority:** P1  
 **Status:** open  
 **Submission window:** 2026-07-31 12:00 CEST — 2026-10-28 12:00 CET  
 **Expected new Actions funded:** up to 80  
