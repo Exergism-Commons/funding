@@ -66,14 +66,16 @@ function deadlineContent(value) {
   if (Number.isNaN(targetTime) || !dateText) {
     return { primary: 'Unknown', secondary: 'deadline unavailable' };
   }
-  if (targetTime <= now.getTime()) {
+
+  const remainingMs = targetTime - now.getTime();
+  if (remainingMs <= 0) {
     return { primary: dateText, secondary: 'deadline passed' };
   }
-
-  const diffDays = Math.ceil((targetTime - now.getTime()) / 86400000);
-  if (diffDays <= 1) {
-    return { primary: dateText, secondary: diffDays === 1 ? '1 day remaining' : 'due today' };
+  if (remainingMs < 86400000) {
+    return { primary: dateText, secondary: 'less than 24 hours remaining' };
   }
+
+  const diffDays = Math.ceil(remainingMs / 86400000);
   return { primary: dateText, secondary: `${diffDays} days remaining` };
 }
 
