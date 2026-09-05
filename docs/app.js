@@ -20,6 +20,7 @@ const state = { opportunities: [], filter: 'all', query: '' };
 const positiveDimensions = ['fit','funding_value','capability_value','strategic_optionality','autonomy_value','network_value','recurrence'];
 const negativeDimensions = ['capture_risk','admin_cost','execution_risk'];
 const requiredDimensions = [...positiveDimensions, ...negativeDimensions];
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function mean(values) {
   if (!values.length) return 0;
@@ -44,15 +45,22 @@ function formatStatus(value) {
   return String(value || 'unknown').replaceAll('_', ' ');
 }
 
-function formatDate(value) {
+function formatDeadline(value) {
   if (!value) return null;
+
   const text = String(value);
-  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})(?:T(\d{2}):(\d{2})(?::\d{2}(?:\.\d+)?)?(Z|[+-]\d{2}:\d{2}))?$/);
   if (!match) return null;
-  const [, year, month, day] = match;
-  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-  const monthName = monthNames[Number(month) - 1];
-  return monthName ? `${day} ${monthName} ${year}` : null;
+
+  const [, year, month, day, hour, minute, zone] = match;
+  const monthName = MONTH_NAMES[Number(month) - 1];
+  if (!monthName) return null;
+
+  const dateText = `${day} ${monthName} ${year}`;
+  if (!hour || !minute || !zone) return dateText;
+
+  const zoneText = zone === 'Z' ? 'UTC' : `UTC${zone}`;
+  return `${dateText} · ${hour}:${minute} ${zoneText}`;
 }
 
 function deadlineContent(value) {
@@ -61,23 +69,23 @@ function deadlineContent(value) {
   const target = new Date(value);
   const now = new Date();
   const targetTime = target.getTime();
-  const dateText = formatDate(value);
+  const deadlineText = formatDeadline(value);
 
-  if (Number.isNaN(targetTime) || !dateText) {
+  if (Number.isNaN(targetTime) || !deadlineText) {
     return { primary: 'Unknown', secondary: 'deadline unavailable' };
   }
 
   const remainingMs = targetTime - now.getTime();
   if (remainingMs <= 0) {
-    return { primary: dateText, secondary: 'deadline passed' };
+    return { primary: deadlineText, secondary: 'deadline passed' };
   }
   if (remainingMs < 86400000) {
-    return { primary: dateText, secondary: 'less than 24 hours remaining' };
+    return { primary: deadlineText, secondary: 'less than 24 hours remaining' };
   }
 
   const diffDays = Math.ceil(remainingMs / 86400000);
   const dayLabel = diffDays === 1 ? 'day' : 'days';
-  return { primary: dateText, secondary: `${diffDays} ${dayLabel} remaining` };
+  return { primary: deadlineText, secondary: `${diffDays} ${dayLabel} remaining` };
 }
 
 function matches(opportunity) {
