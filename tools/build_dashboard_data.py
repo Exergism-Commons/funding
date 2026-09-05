@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 from datetime import date, datetime
 from pathlib import Path
 from typing import Any
@@ -32,6 +33,7 @@ ALLOWED_KINDS = {"funding_call", "network_call", "strategic_engagement"}
 ALLOWED_STATUSES = {"forthcoming", "open", "continuous", "closed", "cancelled"}
 ALLOWED_PROPOSAL_STATUSES = {"scoping", "drafting", "submitted", "awarded", "rejected"}
 TERMINAL_PROPOSAL_STATUSES = {"awarded", "rejected"}
+CURRENCY_CODE = re.compile(r"^[A-Z]{3}$")
 
 
 def load_yaml(path: Path) -> dict[str, Any]:
@@ -180,6 +182,12 @@ def build_proposals() -> dict[str, Any]:
         if status not in ALLOWED_PROPOSAL_STATUSES:
             raise ValueError(f"{proposal_id}: invalid proposal status {status!r}")
 
+        currency = proposal.get("currency", "EUR")
+        if not isinstance(currency, str) or not CURRENCY_CODE.fullmatch(currency):
+            raise ValueError(
+                f"{proposal_id}: currency must be a three-letter uppercase code, got {currency!r}"
+            )
+
         opportunity_id = proposal.get("opportunity_id")
         if not isinstance(opportunity_id, str) or not opportunity_id:
             raise ValueError(f"{proposal_id}: proposal must reference an opportunity_id")
@@ -198,7 +206,7 @@ def build_proposals() -> dict[str, Any]:
                 "status": status,
                 "updated": scalar(proposal.get("updated")),
                 "deadline": scalar(opportunity.get("deadline")),
-                "currency": proposal.get("currency", "EUR"),
+                "currency": currency,
                 "requested_amount": proposal.get("requested_amount"),
                 "summary": proposal.get("summary"),
                 "next_action": proposal.get("next_action"),
