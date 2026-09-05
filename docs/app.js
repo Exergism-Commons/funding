@@ -240,7 +240,7 @@ function injectMachineGovernance() {
       <section class="section" id="machine-governance">
         <div class="shell">
           <div class="section-heading">
-            <p class="eyebrow">03 · Executable governance</p>
+            <p class="eyebrow">04 · Executable governance</p>
             <h2>Policy that can be inspected by machines.</h2>
             <p>Funding governance is represented as an auditable semantic stack. Code validates explicit institutional state; it does not replace the competent EC body, statutes or applicable law.</p>
           </div>
