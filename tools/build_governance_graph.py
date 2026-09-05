@@ -23,9 +23,13 @@ from rdflib.namespace import XSD
 
 
 ROOT = Path(__file__).resolve().parents[1]
+COMMONS_NAMESPACE = "https://id.exergism.org/commons#"
+GOVERNANCE_NAMESPACE = "https://id.exergism.org/governance#"
 VOCABULARY_NAMESPACE = "https://id.exergism.org/funding#"
 ONTOLOGY_IRI = "https://id.exergism.org/ontology/funding"
 RECORD_BASE = "https://id.exergism.org/funding/id/"
+EC = Namespace(COMMONS_NAMESPACE)
+ECG = Namespace(GOVERNANCE_NAMESPACE)
 ECF = Namespace(VOCABULARY_NAMESPACE)
 
 DIMENSION_PREDICATES = {
@@ -98,12 +102,12 @@ def load_opportunity_graph(path: Path) -> tuple[Graph, dict]:
         subject = URIRef(f"{RECORD_BASE}{stable_id}")
 
         graph.add((subject, RDF.type, ECF.FundingOpportunity))
-        graph.add((subject, ECF.stableId, Literal(stable_id)))
-        graph.add((subject, ECF.title, Literal(name)))
-        graph.add((subject, ECF.provenance, Literal(f"data/opportunities.yaml#{raw_id}")))
+        graph.add((subject, EC.stableId, Literal(stable_id)))
+        graph.add((subject, EC.title, Literal(name)))
+        graph.add((subject, EC.provenance, Literal(f"data/opportunities.yaml#{raw_id}")))
 
         if isinstance(opportunity.get("status"), str):
-            graph.add((subject, ECF.status, Literal(opportunity["status"])))
+            graph.add((subject, EC.status, Literal(opportunity["status"])))
 
         complete = True
         parsed_scores: dict[str, Decimal] = {}
@@ -124,6 +128,8 @@ def load_opportunity_graph(path: Path) -> tuple[Graph, dict]:
         "schema_version": document.get("schema_version"),
         "source": "data/opportunities.yaml",
         "source_sha256": hashlib.sha256(raw).hexdigest(),
+        "commons_namespace": COMMONS_NAMESPACE,
+        "governance_namespace": GOVERNANCE_NAMESPACE,
         "opportunity_count": len(opportunities),
         "rank_eligible_count": rank_eligible_count,
         "vocabulary_namespace": VOCABULARY_NAMESPACE,
