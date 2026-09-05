@@ -163,6 +163,11 @@ def build_proposals() -> dict[str, Any]:
     metadata_files = sorted((ROOT / "proposals").glob("*/proposal.yaml"))
     opportunity_source = load_yaml(ROOT / "data" / "opportunities.yaml")
     opportunities = opportunity_index(opportunity_source)
+    default_currency = opportunity_source.get("currency_default")
+    if not isinstance(default_currency, str) or not CURRENCY_CODE.fullmatch(default_currency):
+        raise ValueError(
+            "data/opportunities.yaml: currency_default must be a three-letter uppercase code"
+        )
 
     for path in metadata_files:
         proposal = load_yaml(path)
@@ -183,7 +188,7 @@ def build_proposals() -> dict[str, Any]:
         if status not in ALLOWED_PROPOSAL_STATUSES:
             raise ValueError(f"{proposal_id}: invalid proposal status {status!r}")
 
-        currency = proposal.get("currency", "EUR")
+        currency = proposal.get("currency", default_currency)
         if not isinstance(currency, str) or not CURRENCY_CODE.fullmatch(currency):
             raise ValueError(
                 f"{proposal_id}: currency must be a three-letter uppercase code, got {currency!r}"
