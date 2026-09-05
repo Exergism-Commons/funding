@@ -20,7 +20,7 @@ const state = { opportunities: [], filter: 'all', query: '' };
 const positiveDimensions = ['fit','funding_value','capability_value','strategic_optionality','autonomy_value','network_value','recurrence'];
 const negativeDimensions = ['capture_risk','admin_cost','execution_risk'];
 const requiredDimensions = [...positiveDimensions, ...negativeDimensions];
-const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const OPPORTUNITY_MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function mean(values) {
   if (!values.length) return 0;
@@ -53,7 +53,7 @@ function formatDeadline(value) {
   if (!match) return null;
 
   const [, year, month, day, hour, minute, zone] = match;
-  const monthName = MONTH_NAMES[Number(month) - 1];
+  const monthName = OPPORTUNITY_MONTH_NAMES[Number(month) - 1];
   if (!monthName) return null;
 
   const dateText = `${day} ${monthName} ${year}`;
