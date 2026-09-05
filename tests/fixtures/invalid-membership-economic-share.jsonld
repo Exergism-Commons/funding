@@ -1,6 +1,0 @@
-{
-  "@context": "../../ontology/funding-context.jsonld",
-  "@id": "urn:ecf:PERSON-MEMBER",
-  "@type": "Person",
-  "membershipEconomicShare": 0.3333
-}
