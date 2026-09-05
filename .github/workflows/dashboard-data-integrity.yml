@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - "data/opportunities.yaml"
+      - "opportunities/**"
+      - "partnerships/**"
       - "proposals/**"
       - "tools/build_dashboard_data.py"
       - "docs/data/**"
@@ -11,6 +13,8 @@ on:
   pull_request:
     paths:
       - "data/opportunities.yaml"
+      - "opportunities/**"
+      - "partnerships/**"
       - "proposals/**"
       - "tools/build_dashboard_data.py"
       - "docs/data/**"
