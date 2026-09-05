@@ -34,7 +34,6 @@ function proposalAmount(proposal) {
   return new Intl.NumberFormat('en-GB', {
     style: 'currency',
     currency: proposal.currency || 'EUR',
-    maximumFractionDigits: 0,
   }).format(proposal.requested_amount);
 }
 
