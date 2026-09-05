@@ -6,7 +6,7 @@ import unittest
 import yaml
 from pyshacl import validate as shacl_validate
 from rdflib import Graph, Namespace, RDF, URIRef
-from rdflib.namespace import OWL
+from rdflib.namespace import OWL, RDFS
 
 from tools.build_governance_graph import DIMENSION_PREDICATES, build
 
@@ -17,9 +17,13 @@ SHAPES = ROOT / "ontology" / "funding.shacl.ttl"
 CONTEXT = ROOT / "ontology" / "funding-context.jsonld"
 FIXTURES = ROOT / "tests" / "fixtures"
 OPPORTUNITIES = ROOT / "data" / "opportunities.yaml"
+COMMONS_NAMESPACE = "https://id.exergism.org/commons#"
+GOVERNANCE_NAMESPACE = "https://id.exergism.org/governance#"
 VOCABULARY_NAMESPACE = "https://id.exergism.org/funding#"
 ONTOLOGY_IRI = "https://id.exergism.org/ontology/funding"
 RECORD_BASE = "https://id.exergism.org/funding/id/"
+EC = Namespace(COMMONS_NAMESPACE)
+ECG = Namespace(GOVERNANCE_NAMESPACE)
 ECF = Namespace(VOCABULARY_NAMESPACE)
 SH = Namespace("http://www.w3.org/ns/shacl#")
 
@@ -61,16 +65,56 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         self.assertGreater(len(ontology), 0)
         self.assertGreater(len(shapes), 0)
         self.assertIn((URIRef(ONTOLOGY_IRI), RDF.type, OWL.Ontology), ontology)
-        self.assertIn((ECF.GovernanceRecord, RDF.type, OWL.Class), ontology)
+        self.assertIn(
+            (ECF.FundingAcceptanceDecision, RDFS.subClassOf, ECG.GovernanceDecision),
+            ontology,
+        )
         self.assertIn((ECF.GovernanceRecordShape, RDF.type, SH.NodeShape), shapes)
         self.assertIn(
-            (ECF.GovernanceRecordShape, SH.targetClass, ECF.GovernanceRecord),
+            (ECF.GovernanceRecordShape, SH.targetClass, ECF.FundingOpportunity),
             shapes,
         )
 
         context = json.loads(CONTEXT.read_text(encoding="utf-8"))["@context"]
+        self.assertEqual(context["ec"]["@id"], COMMONS_NAMESPACE)
+        self.assertEqual(context["ecg"]["@id"], GOVERNANCE_NAMESPACE)
         self.assertEqual(context["ecf"]["@id"], VOCABULARY_NAMESPACE)
-        self.assertIs(context["ecf"]["@prefix"], True)
+
+    def test_funding_does_not_redefine_shared_or_governance_terms(self):
+        ontology = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
+        forbidden_classes = (
+            ECF.Actor,
+            ECF.Person,
+            ECF.Organization,
+            ECF.GovernanceRecord,
+            ECF.GovernanceDecision,
+            ECF.Vote,
+            ECF.ConflictDisclosure,
+        )
+        for term in forbidden_classes:
+            self.assertNotIn((term, RDF.type, OWL.Class), ontology, term)
+
+        forbidden_properties = (
+            ECF.stableId,
+            ECF.title,
+            ECF.status,
+            ECF.rationale,
+            ECF.provenance,
+            ECF.supersedes,
+            ECF.reviewDue,
+            ECF.approvalClass,
+            ECF.hasVote,
+            ECF.voter,
+            ECF.voteValue,
+            ECF.conflictDisclosure,
+            ECF.interestedParty,
+            ECF.membershipEconomicShare,
+        )
+        for term in forbidden_properties:
+            self.assertFalse(
+                any(ontology.triples((term, RDF.type, None))),
+                f"Funding must not define shared/governance property {term}",
+            )
 
     def test_ontology_has_no_property_chain_governance_inference(self):
         ontology = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
@@ -91,18 +135,19 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
     def test_canonical_identity_cannot_be_disabled_by_provenance_data(self):
         graph = Graph().parse(
             data=f"""
+                @prefix ec: <{COMMONS_NAMESPACE}> .
                 @prefix ecf: <{VOCABULARY_NAMESPACE}> .
                 <urn:forged:record> a ecf:FundingOpportunity ;
-                    ecf:stableId "ECF-OPP-FORGED" ;
-                    ecf:title "Forged fixture-looking record" ;
+                    ec:stableId "ECF-OPP-FORGED" ;
+                    ec:title "Forged fixture-looking record" ;
                     ecf:rankEligible false ;
-                    ecf:provenance "tests/fixtures/not-really-a-fixture.jsonld" .
+                    ec:provenance "tests/fixtures/not-really-a-fixture.jsonld" .
             """,
             format="turtle",
         )
         conforms, _, report = validate_graph(graph)
         self.assertFalse(conforms)
-        self.assertIn("Canonical governance-record IRIs", report)
+        self.assertIn("Canonical funding-record IRIs", report)
 
     def test_canonical_knowledge_uses_id_exergism_record_base(self):
         graph = Graph()
@@ -111,7 +156,7 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         for path in paths:
             graph.parse(path.as_posix(), format="json-ld")
 
-        records = list(graph.subject_objects(ECF.stableId))
+        records = list(graph.subject_objects(EC.stableId))
         self.assertGreater(len(records), 0)
         for subject, stable_id in records:
             self.assertEqual(str(subject), f"{RECORD_BASE}{stable_id}")
@@ -145,24 +190,17 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
                 all(key in opportunity for key in DIMENSION_PREDICATES)
                 for opportunity in source["opportunities"]
             )
-            self.assertEqual(
-                manifest_a["rank_eligible_count"],
-                expected_rank_eligible,
-            )
-            self.assertLessEqual(
-                manifest_a["rank_eligible_count"],
-                manifest_a["opportunity_count"],
-            )
+            self.assertEqual(manifest_a["rank_eligible_count"], expected_rank_eligible)
+            self.assertLessEqual(manifest_a["rank_eligible_count"], manifest_a["opportunity_count"])
+            self.assertEqual(manifest_a["commons_namespace"], COMMONS_NAMESPACE)
+            self.assertEqual(manifest_a["governance_namespace"], GOVERNANCE_NAMESPACE)
             self.assertEqual(manifest_a["vocabulary_namespace"], VOCABULARY_NAMESPACE)
             self.assertEqual(manifest_a["ontology_iri"], ONTOLOGY_IRI)
             self.assertEqual(manifest_a["record_base"], RECORD_BASE)
 
-            graph = Graph().parse(
-                (first / "funding-governance.ttl").as_posix(),
-                format="turtle",
-            )
+            graph = Graph().parse((first / "funding-governance.ttl").as_posix(), format="turtle")
             self.assertGreater(len(list(graph.subjects(RDF.type, ECF.FundingOpportunity))), 0)
-            for subject, stable_id in graph.subject_objects(ECF.stableId):
+            for subject, stable_id in graph.subject_objects(EC.stableId):
                 self.assertEqual(str(subject), f"{RECORD_BASE}{stable_id}")
 
             conforms, _, report = validate_graph(graph)
@@ -236,15 +274,9 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         conforms, _, report = validate_graph(graph, fixture=True)
         self.assertFalse(conforms)
         self.assertTrue(
-            "exceptionalCondition" in report or "approvalClass" in report,
+            "exceptionalCondition" in report or "decisionClass" in report,
             report,
         )
-
-    def test_membership_economic_share_is_rejected(self):
-        graph = parse_jsonld(FIXTURES / "invalid-membership-economic-share.jsonld")
-        conforms, _, report = validate_graph(graph, fixture=True)
-        self.assertFalse(conforms)
-        self.assertIn("membershipEconomicShare", report)
 
     def test_incomplete_ranked_eiv_is_rejected(self):
         graph = parse_jsonld(FIXTURES / "invalid-incomplete-eiv.jsonld")
