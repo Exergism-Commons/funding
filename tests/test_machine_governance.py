@@ -14,6 +14,7 @@ from tools.build_governance_graph import DIMENSION_PREDICATES, build
 ROOT = Path(__file__).resolve().parents[1]
 ONTOLOGY = ROOT / "ontology" / "funding.owl.ttl"
 SHAPES = ROOT / "ontology" / "funding.shacl.ttl"
+GOVERNANCE_SHAPES = ROOT / "ontology" / "dependencies" / "governance-shapes.ttl"
 CONTEXT = ROOT / "ontology" / "funding-context.jsonld"
 FIXTURES = ROOT / "tests" / "fixtures"
 OPPORTUNITIES = ROOT / "data" / "opportunities.yaml"
@@ -35,6 +36,7 @@ def parse_jsonld(path: Path) -> Graph:
 def validate_graph(data_graph: Graph, *, fixture: bool = False):
     ontology_graph = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
     shapes_graph = Graph().parse(SHAPES.as_posix(), format="turtle")
+    shapes_graph.parse(GOVERNANCE_SHAPES.as_posix(), format="turtle")
     if fixture:
         # Fixture mode is selected by the test harness, never by record data.
         # It removes only the public-IRI constraint so adversarial examples can
@@ -62,8 +64,10 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
     def test_ontology_and_shapes_parse(self):
         ontology = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
         shapes = Graph().parse(SHAPES.as_posix(), format="turtle")
+        governance_shapes = Graph().parse(GOVERNANCE_SHAPES.as_posix(), format="turtle")
         self.assertGreater(len(ontology), 0)
         self.assertGreater(len(shapes), 0)
+        self.assertGreater(len(governance_shapes), 0)
         self.assertIn((URIRef(ONTOLOGY_IRI), RDF.type, OWL.Ontology), ontology)
         self.assertIn(
             (ECF.FundingAcceptanceDecision, RDFS.subClassOf, ECG.GovernanceDecision),
@@ -73,6 +77,11 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         self.assertIn(
             (ECF.GovernanceRecordShape, SH.targetClass, ECF.FundingOpportunity),
             shapes,
+        )
+        self.assertIn((ECG.VoteShape, RDF.type, SH.NodeShape), governance_shapes)
+        self.assertIn(
+            (ECG.ConflictDeclarationShape, RDF.type, SH.NodeShape),
+            governance_shapes,
         )
 
         context = json.loads(CONTEXT.read_text(encoding="utf-8"))["@context"]
@@ -115,6 +124,22 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
                 any(ontology.triples((term, RDF.type, None))),
                 f"Funding must not define shared/governance property {term}",
             )
+
+    def test_delegated_governance_vote_shape_rejects_legacy_vote_value(self):
+        graph = Graph().parse(
+            data=f"""
+                @prefix ec: <{COMMONS_NAMESPACE}> .
+                @prefix ecg: <{GOVERNANCE_NAMESPACE}> .
+                <urn:person> a ec:Person .
+                <urn:vote> a ecg:Vote ;
+                    ecg:voter <urn:person> ;
+                    ecg:voteValue "approve" .
+            """,
+            format="turtle",
+        )
+        conforms, _, report = validate_graph(graph)
+        self.assertFalse(conforms)
+        self.assertIn("voteValue", report)
 
     def test_ontology_has_no_property_chain_governance_inference(self):
         ontology = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
