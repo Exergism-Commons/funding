@@ -14,6 +14,8 @@ from tools.build_governance_graph import DIMENSION_PREDICATES, build
 ROOT = Path(__file__).resolve().parents[1]
 ONTOLOGY = ROOT / "ontology" / "funding.owl.ttl"
 SHAPES = ROOT / "ontology" / "funding.shacl.ttl"
+COMMONS_ONTOLOGY = ROOT / "ontology" / "dependencies" / "commons.ttl"
+GOVERNANCE_ONTOLOGY = ROOT / "ontology" / "dependencies" / "governance.ttl"
 GOVERNANCE_SHAPES = ROOT / "ontology" / "dependencies" / "governance-shapes.ttl"
 CONTEXT = ROOT / "ontology" / "funding-context.jsonld"
 FIXTURES = ROOT / "tests" / "fixtures"
@@ -34,18 +36,28 @@ def parse_jsonld(path: Path) -> Graph:
 
 
 def validate_graph(data_graph: Graph, *, fixture: bool = False):
-    ontology_graph = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
+    ontology_graph = Graph().parse(COMMONS_ONTOLOGY.as_posix(), format="turtle")
+    ontology_graph.parse(GOVERNANCE_ONTOLOGY.as_posix(), format="turtle")
+    ontology_graph.parse(ONTOLOGY.as_posix(), format="turtle")
     shapes_graph = Graph().parse(SHAPES.as_posix(), format="turtle")
     shapes_graph.parse(GOVERNANCE_SHAPES.as_posix(), format="turtle")
     if fixture:
         # Fixture mode is selected by the test harness, never by record data.
-        # It removes only the public-IRI constraint so adversarial examples can
-        # use non-public node IRIs without minting fake stable identifiers.
+        # It removes only the public-IRI constraint and the generic Governance
+        # decision target so adversarial Funding fixtures can isolate the local
+        # policy invariant under test. Shared Vote/Conflict shapes remain active.
         shapes_graph.remove(
             (
                 ECF.GovernanceRecordShape,
                 SH.sparql,
                 ECF.CanonicalRecordIdentityConstraint,
+            )
+        )
+        shapes_graph.remove(
+            (
+                ECG.GovernanceDecisionShape,
+                SH.targetClass,
+                ECG.GovernanceDecision,
             )
         )
     return shacl_validate(
@@ -63,9 +75,13 @@ def validate_graph(data_graph: Graph, *, fixture: bool = False):
 class MachineGovernanceIntegrityTests(unittest.TestCase):
     def test_ontology_and_shapes_parse(self):
         ontology = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
+        commons = Graph().parse(COMMONS_ONTOLOGY.as_posix(), format="turtle")
+        governance = Graph().parse(GOVERNANCE_ONTOLOGY.as_posix(), format="turtle")
         shapes = Graph().parse(SHAPES.as_posix(), format="turtle")
         governance_shapes = Graph().parse(GOVERNANCE_SHAPES.as_posix(), format="turtle")
         self.assertGreater(len(ontology), 0)
+        self.assertGreater(len(commons), 0)
+        self.assertGreater(len(governance), 0)
         self.assertGreater(len(shapes), 0)
         self.assertGreater(len(governance_shapes), 0)
         self.assertIn((URIRef(ONTOLOGY_IRI), RDF.type, OWL.Ontology), ontology)
@@ -78,6 +94,7 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
             (ECF.GovernanceRecordShape, SH.targetClass, ECF.FundingOpportunity),
             shapes,
         )
+        self.assertIn((ECG.GovernanceDecisionShape, RDF.type, SH.NodeShape), governance_shapes)
         self.assertIn((ECG.VoteShape, RDF.type, SH.NodeShape), governance_shapes)
         self.assertIn(
             (ECG.ConflictDeclarationShape, RDF.type, SH.NodeShape),
@@ -88,6 +105,8 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         self.assertEqual(context["ec"]["@id"], COMMONS_NAMESPACE)
         self.assertEqual(context["ecg"]["@id"], GOVERNANCE_NAMESPACE)
         self.assertEqual(context["ecf"]["@id"], VOCABULARY_NAMESPACE)
+        self.assertEqual(context["operative"]["@id"], "ec:operative")
+        self.assertEqual(context["governanceVersion"], "ecg:governanceVersion")
 
     def test_funding_does_not_redefine_shared_or_governance_terms(self):
         ontology = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
@@ -124,6 +143,34 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
                 any(ontology.triples((term, RDF.type, None))),
                 f"Funding must not define shared/governance property {term}",
             )
+
+    def test_generic_governance_decision_shape_is_enforced(self):
+        graph = Graph().parse(
+            data=f"""
+                @prefix ecg: <{GOVERNANCE_NAMESPACE}> .
+                <urn:decision> a ecg:GovernanceDecision ;
+                    ecg:decisionClass ecg:OrdinaryApproval ;
+                    ecg:governanceVersion "0.1-PRE1" .
+            """,
+            format="turtle",
+        )
+        conforms, _, report = validate_graph(graph)
+        self.assertFalse(conforms)
+        self.assertIn("operative", report)
+
+    def test_active_member_can_vote_via_governance_subclass_inference(self):
+        graph = Graph().parse(
+            data=f"""
+                @prefix ecg: <{GOVERNANCE_NAMESPACE}> .
+                <urn:member> a ecg:ActiveMember .
+                <urn:vote> a ecg:Vote ;
+                    ecg:voter <urn:member> ;
+                    ecg:voteValue "for" .
+            """,
+            format="turtle",
+        )
+        conforms, _, report = validate_graph(graph)
+        self.assertTrue(conforms, report)
 
     def test_delegated_governance_vote_shape_rejects_legacy_vote_value(self):
         graph = Graph().parse(
