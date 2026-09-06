@@ -1,4 +1,5 @@
 from pathlib import Path
+import hashlib
 import json
 import tempfile
 import unittest
@@ -14,9 +15,11 @@ from tools.build_governance_graph import DIMENSION_PREDICATES, build
 ROOT = Path(__file__).resolve().parents[1]
 ONTOLOGY = ROOT / "ontology" / "funding.owl.ttl"
 SHAPES = ROOT / "ontology" / "funding.shacl.ttl"
-COMMONS_ONTOLOGY = ROOT / "ontology" / "dependencies" / "commons.ttl"
-GOVERNANCE_ONTOLOGY = ROOT / "ontology" / "dependencies" / "governance.ttl"
-GOVERNANCE_SHAPES = ROOT / "ontology" / "dependencies" / "governance-shapes.ttl"
+DEPENDENCY_DIR = ROOT / "ontology" / "dependencies"
+DEPENDENCY_MANIFEST = DEPENDENCY_DIR / "manifest.json"
+COMMONS_ONTOLOGY = DEPENDENCY_DIR / "commons.ttl"
+GOVERNANCE_ONTOLOGY = DEPENDENCY_DIR / "governance.ttl"
+GOVERNANCE_SHAPES = DEPENDENCY_DIR / "governance-shapes.ttl"
 CONTEXT = ROOT / "ontology" / "funding-context.jsonld"
 FIXTURES = ROOT / "tests" / "fixtures"
 OPPORTUNITIES = ROOT / "data" / "opportunities.yaml"
@@ -25,6 +28,7 @@ GOVERNANCE_NAMESPACE = "https://id.exergism.org/governance#"
 VOCABULARY_NAMESPACE = "https://id.exergism.org/funding#"
 ONTOLOGY_IRI = "https://id.exergism.org/ontology/funding"
 RECORD_BASE = "https://id.exergism.org/funding/id/"
+GOVERNANCE_SOURCE_COMMIT = "06e614c21f9623658c16175a381279f9c36ef526"
 EC = Namespace(COMMONS_NAMESPACE)
 ECG = Namespace(GOVERNANCE_NAMESPACE)
 ECF = Namespace(VOCABULARY_NAMESPACE)
@@ -35,6 +39,11 @@ def parse_jsonld(path: Path) -> Graph:
     return Graph().parse(path.as_posix(), format="json-ld")
 
 
+def git_blob_sha(data: bytes) -> str:
+    header = f"blob {len(data)}\0".encode("ascii")
+    return hashlib.sha1(header + data).hexdigest()
+
+
 def validate_graph(data_graph: Graph, *, fixture: bool = False):
     ontology_graph = Graph().parse(COMMONS_ONTOLOGY.as_posix(), format="turtle")
     ontology_graph.parse(GOVERNANCE_ONTOLOGY.as_posix(), format="turtle")
@@ -43,21 +52,14 @@ def validate_graph(data_graph: Graph, *, fixture: bool = False):
     shapes_graph.parse(GOVERNANCE_SHAPES.as_posix(), format="turtle")
     if fixture:
         # Fixture mode is selected by the test harness, never by record data.
-        # It removes only the public-IRI constraint and the generic Governance
-        # decision target so adversarial Funding fixtures can isolate the local
-        # policy invariant under test. Shared Vote/Conflict shapes remain active.
+        # It relaxes only the public-IRI constraint so non-canonical adversarial
+        # examples do not mint fake persistent identifiers. Governance shapes
+        # remain identical to the canonical production validation profile.
         shapes_graph.remove(
             (
                 ECF.GovernanceRecordShape,
                 SH.sparql,
                 ECF.CanonicalRecordIdentityConstraint,
-            )
-        )
-        shapes_graph.remove(
-            (
-                ECG.GovernanceDecisionShape,
-                SH.targetClass,
-                ECG.GovernanceDecision,
             )
         )
     return shacl_validate(
@@ -107,6 +109,19 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         self.assertEqual(context["ecf"]["@id"], VOCABULARY_NAMESPACE)
         self.assertEqual(context["operative"]["@id"], "ec:operative")
         self.assertEqual(context["governanceVersion"], "ecg:governanceVersion")
+
+    def test_governance_dependency_snapshots_match_pinned_git_blobs(self):
+        manifest = json.loads(DEPENDENCY_MANIFEST.read_text(encoding="utf-8"))
+        self.assertEqual(manifest["source_repository"], "Exergism-Commons/governance")
+        self.assertEqual(manifest["source_commit"], GOVERNANCE_SOURCE_COMMIT)
+        for filename, metadata in manifest["files"].items():
+            path = DEPENDENCY_DIR / filename
+            self.assertTrue(path.is_file(), filename)
+            self.assertEqual(
+                git_blob_sha(path.read_bytes()),
+                metadata["git_blob_sha"],
+                f"{filename} drifted from pinned Governance blob",
+            )
 
     def test_funding_does_not_redefine_shared_or_governance_terms(self):
         ontology = Graph().parse(ONTOLOGY.as_posix(), format="turtle")
