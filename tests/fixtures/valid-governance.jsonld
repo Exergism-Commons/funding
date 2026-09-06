@@ -77,7 +77,7 @@
       "@type": "Vote",
       "id": "ECF-VOTE-COMP-VALID-BOB",
       "voter": "urn:ecf:PERSON-BOB",
-      "voteValue": "approve",
+      "voteValue": "for",
       "provenance": "tests/fixtures/valid-governance.jsonld"
     },
     {
