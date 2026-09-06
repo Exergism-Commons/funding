@@ -56,23 +56,28 @@ https://id.exergism.org/funding/id/ECF-DEC-EXAMPLE-001
 
 Artifacts:
 
-- `ontology/funding.owl.ttl` — OWL TBox;
-- `ontology/funding-context.jsonld` — Git-native JSON-LD context;
-- `ontology/funding.shacl.ttl` — canonical closed constraints;
+- `ontology/funding.owl.ttl` — Funding-owned OWL TBox;
+- `ontology/funding-context.jsonld` — Git-native JSON-LD context composing Funding, Commons and Governance terms;
+- `ontology/funding.shacl.ttl` — Funding-owned policy constraints;
+- `ontology/dependencies/governance-shapes.ttl` — pinned, non-authoritative validation snapshot for the Governance `Vote` and `ConflictDeclaration` shapes consumed by Funding;
 - `knowledge/` — canonical ABox records;
 - `tests/fixtures/` — deliberately valid/invalid non-canonical records;
 - `tests/test_machine_governance.py` — semantic integrity test suite;
 - `.github/workflows/machine-governance-integrity.yml` — CI enforcement.
 
+The dependency snapshot does not transfer semantic ownership to Funding. Its source commit is recorded in the snapshot itself; semantic changes must originate in `Exergism-Commons/governance` and be deliberately synchronized here so validation remains deterministic and does not depend on network access.
+
 Canonical records and derived opportunity records MUST use the HTTP record base above. Non-canonical test fixtures MAY use non-public IRIs so that tests do not mint fake persistent identifiers.
 
 The identifier architecture is intentionally cross-project but authority remains separated:
 
+- shared EC primitives: `https://id.exergism.org/commons#`;
+- institutional Governance: `https://id.exergism.org/governance#`;
+- Funding vocabulary: `https://id.exergism.org/funding#`;
 - Exergism vocabulary: `https://id.exergism.org/exergism#`;
-- ECL vocabulary: `https://id.exergism.org/ecl#`;
-- Funding vocabulary: `https://id.exergism.org/funding#`.
+- ECL vocabulary: `https://id.exergism.org/ecl#`.
 
-Shared use of the host does not imply shared semantics or legal authority.
+Shared use of the host does not imply shared semantics or legal authority. Funding reuses Commons identity/provenance terms and Governance decision, vote and conflict terms rather than minting competing `funding#` equivalents.
 
 ## 4. Initial domain model
 
@@ -166,9 +171,11 @@ Represents remuneration for real work rather than an economic entitlement arisin
 Initial invariants include:
 
 - beneficiary, work basis, amount and currency are explicit;
-- at least one conflict disclosure is linked;
+- at least one Governance conflict declaration is linked;
 - the beneficiary is named as an interested party;
 - if the beneficiary has a recorded vote on their own compensation, it must be `abstain`.
+
+Votes and conflict declarations use Governance-owned semantics. In particular, `ecg:voteValue` uses the Governance vocabulary `for`, `against` and `abstain`; Funding does not define an alternative vote vocabulary.
 
 The model deliberately does not infer employment status, tax treatment or the legality of a specific contractual form.
 
@@ -185,17 +192,21 @@ The initial machine policy requires:
 
 These are governance safeguards, not investment advice and not a substitute for tax/accounting/legal review.
 
-## 5. Explicitly forbidden state
+## 5. Membership and economic ownership boundary
 
-`ecf:membershipEconomicShare` exists only as a detectable forbidden predicate. Any canonical record asserting a distributable economic share because of membership fails SHACL validation.
+Funding intentionally defines **no** `ecf:membershipEconomicShare` predicate and no Funding-local membership ownership model. Membership is an institutional Governance concept, and Governance explicitly states that membership does not itself imply an economic ownership share.
 
-This makes the repository distinction machine-checkable:
+Funding therefore enforces the boundary by not minting or accepting a Funding-owned semantic shortcut for membership-derived ownership. Any future machine representation of economic rights must be defined by the competent legal/economic instrument and its owning semantic domain; it must not be inferred merely from membership or contribution status.
+
+The policy distinction remains:
 
 ```text
 membership ≠ ownership claim
 work       → may support compensation
-capital    → belongs to EC
+capital    → belongs to EC subject to the competent legal/institutional framework
 ```
+
+Tests guard the Funding ontology against accidentally reintroducing the removed shared/Governance property family. Organization-wide membership/economic-right invariants belong to Governance, not to the Funding namespace.
 
 ## 6. Decision lifecycle
 
@@ -225,14 +236,14 @@ Institutional funding-state records are also time-bounded review artifacts. `Boo
 
 ## 7. What should become machine-readable next
 
-The v0.1 profile is intentionally narrow. Candidate next layers are:
+The pre-1.0 profile is intentionally narrow. Candidate next layers are:
 
 1. funding agreements and restriction clauses;
 2. donor/funder identities and rolling concentration calculations;
 3. reserve and Endowment allocation decisions;
 4. annual Endowment spending-rule computation;
 5. treasury liquidity buckets;
-6. conflicts/recusals and quorum/majority profiles sourced from `governance`;
+6. quorum/majority profiles and broader Governance validation composition beyond the delegated Vote/ConflictDeclaration checks already consumed here;
 7. immutable governance snapshots binding policy versions to decisions;
 8. SPARQL dependency checks showing which decisions become stale when a policy or funding condition changes;
 9. formal bootstrap exit criteria once EC has enough financial history to calibrate them;
@@ -246,11 +257,11 @@ The funding ontology is not the constitution of EC and is not an extension of th
 The intended dependency direction is:
 
 ```text
-EC governance / statutes
+EC Governance / statutes
         ↓
-funding policies and machine profile
+Funding policies and machine profile
         ↓
-funding records and decisions
+Funding records and decisions
         ↓
 persistent public identity through id.exergism.org
 ```
