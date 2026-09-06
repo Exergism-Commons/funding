@@ -18,7 +18,7 @@
       "@type": "Vote",
       "id": "ECF-VOTE-INVALID-COMP",
       "voter": "urn:ecf:PERSON-BENEFICIARY",
-      "voteValue": "approve",
+      "voteValue": "for",
       "provenance": "tests/fixtures/invalid-self-compensation-vote.jsonld"
     },
     {
