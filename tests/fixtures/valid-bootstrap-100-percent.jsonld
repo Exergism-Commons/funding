@@ -41,6 +41,8 @@
       "id": "ECF-DEC-BOOTSTRAP-FIRST-GRANT",
       "title": "Accept first EC grant under bootstrap safeguards",
       "status": "proposed",
+      "operative": false,
+      "governanceVersion": "0.1-PRE1",
       "decisionDate": "2026-09-02",
       "approvalClass": "qualified",
       "rationale": "The grant creates temporary 100 percent concentration because it is EC's first material funding source. The dependency is explicitly recorded and governed through a diversification plan and enhanced approval.",
