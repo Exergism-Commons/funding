@@ -41,6 +41,8 @@
       "id": "ECF-DEC-ACCEPT-CONCENTRATED-VALID-001",
       "title": "Accept temporarily concentrated funding with diversification plan",
       "status": "proposed",
+      "operative": false,
+      "governanceVersion": "0.1-PRE1",
       "decisionDate": "2026-09-02",
       "approvalClass": "ordinary",
       "rationale": "Fixture demonstrating that concentration above 30% is reviewable when an explicit diversification plan exists.",
