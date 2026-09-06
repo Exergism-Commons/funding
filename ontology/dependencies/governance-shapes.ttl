@@ -6,11 +6,50 @@
 # Validation dependency snapshot from Exergism-Commons/governance
 # commit 06e614c21f9623658c16175a381279f9c36ef526.
 #
-# This file is NOT authoritative for Governance semantics. Funding loads only
-# the shared record shapes it directly consumes after moving Vote and
-# ConflictDeclaration ownership to governance#. Any semantic change to these
-# shapes must originate in the Governance repository and then update this
-# pinned snapshot deliberately.
+# This file is NOT authoritative for Governance semantics. Funding consumes the
+# Governance structural profile from the pinned authoritative source so shared
+# decision/vote/conflict semantics are not silently weakened locally.
+
+ecg:GovernanceDecisionShape a sh:NodeShape ;
+    sh:targetClass ecg:GovernanceDecision ;
+    sh:property [
+        sh:path ecg:decisionClass ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:class ecg:DecisionClass
+    ] ;
+    sh:property [
+        sh:path ec:operative ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean
+    ] ;
+    sh:property [
+        sh:path ecg:governanceVersion ;
+        sh:minCount 1 ;
+        sh:maxCount 1
+    ] .
+
+ecg:DelegationShape a sh:NodeShape ;
+    sh:targetClass ecg:Delegation ;
+    sh:or (
+      [ sh:property [ sh:path ecg:delegatedTo ; sh:minCount 1 ] ]
+      [ sh:property [ sh:path ecg:delegatedRole ; sh:minCount 1 ] ]
+    ) .
+
+ecg:MembershipRecordShape a sh:NodeShape ;
+    sh:targetClass ecg:MembershipRecord ;
+    sh:property [
+        sh:path ecg:memberRecordId ;
+        sh:minCount 1 ;
+        sh:maxCount 1
+    ] ;
+    sh:property [
+        sh:path ec:operative ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:boolean
+    ] .
 
 ecg:VoteShape a sh:NodeShape ;
     sh:targetClass ecg:Vote ;
