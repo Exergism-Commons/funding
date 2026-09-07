@@ -34,7 +34,7 @@
       "title": "Accept illustrative diversified funding",
       "status": "proposed",
       "operative": false,
-      "governanceVersion": "0.1-PRE1",
+      "governanceVersion": "0.1-DRAFT",
       "decisionDate": "2026-09-02",
       "approvalClass": "ordinary",
       "rationale": "Fixture demonstrating an acceptance decision below concentration safeguards with no governance or EC-wide IP rights granted.",
@@ -44,20 +44,19 @@
       "amount": "25000",
       "currency": "EUR",
       "restricted": true,
+      "rolling24MonthTotalIncomeAfter": "100000",
+      "rolling24MonthSingleFunderIncomeAfter": "25000",
+      "concentrationWindowEnd": "2026-09-02",
+      "concentrationEvidencePath": "tests/evidence/valid-governance-income.json",
+      "concentrationEvidenceSha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
       "singleFunderConcentrationAfter": "0.25",
       "governanceRightGranted": false,
       "ecWideIpOwnershipGranted": false,
       "exclusiveCoreInfrastructureRightGranted": false,
       "provenance": "tests/fixtures/valid-governance.jsonld"
     },
-    {
-      "@id": "urn:ecf:PERSON-ALICE",
-      "@type": "Person"
-    },
-    {
-      "@id": "urn:ecf:PERSON-BOB",
-      "@type": "Person"
-    },
+    {"@id": "urn:ecf:PERSON-ALICE", "@type": "Person"},
+    {"@id": "urn:ecf:PERSON-BOB", "@type": "Person"},
     {
       "@id": "urn:ecf:ECF-CONFLICT-COMP-VALID-001",
       "@type": "ConflictDisclosure",
@@ -89,7 +88,7 @@
       "title": "Approve compensation for defined work",
       "status": "proposed",
       "operative": false,
-      "governanceVersion": "0.1-PRE1",
+      "governanceVersion": "0.1-DRAFT",
       "decisionDate": "2026-09-02",
       "approvalClass": "ordinary",
       "rationale": "Fixture demonstrating compensation tied to real work with conflict disclosure and beneficiary abstention.",
@@ -98,10 +97,7 @@
       "compensationAmount": "20000",
       "currency": "EUR",
       "conflictDisclosure": "urn:ecf:ECF-CONFLICT-COMP-VALID-001",
-      "hasVote": [
-        "urn:ecf:ECF-VOTE-COMP-VALID-ALICE",
-        "urn:ecf:ECF-VOTE-COMP-VALID-BOB"
-      ],
+      "hasVote": ["urn:ecf:ECF-VOTE-COMP-VALID-ALICE", "urn:ecf:ECF-VOTE-COMP-VALID-BOB"],
       "provenance": "tests/fixtures/valid-governance.jsonld"
     },
     {
@@ -111,7 +107,7 @@
       "title": "Exceptional Endowment principal withdrawal",
       "status": "proposed",
       "operative": false,
-      "governanceVersion": "0.1-PRE1",
+      "governanceVersion": "0.1-DRAFT",
       "decisionDate": "2026-09-02",
       "approvalClass": "qualified",
       "rationale": "Fixture demonstrating the enhanced safeguards required before principal can be consumed.",
