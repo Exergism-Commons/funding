@@ -9,9 +9,10 @@
 <https://id.exergism.org/ontology/funding> a owl:Ontology ;
     rdfs:label "Exergism Commons funding governance ontology"@en ;
     owl:versionInfo "0.2.0-pre1" ;
-    owl:imports <https://id.exergism.org/ontology/commons/06e614c21f9623658c16175a381279f9c36ef526>,
-                <https://id.exergism.org/ontology/governance/06e614c21f9623658c16175a381279f9c36ef526> ;
-    rdfs:comment "Funding-domain TBox. Shared identity/provenance primitives and institutional Governance semantics are imported from immutable public snapshots of Governance commit 06e614c21f9623658c16175a381279f9c36ef526, matching the vendored dependency closure used by Funding CI. Persistent public identifiers are issued under id.exergism.org; legal and institutional authority remains with Exergism Commons governance under applicable law and statutes."@en .
+    owl:versionIRI <https://id.exergism.org/ontology/funding/0.2.0-pre1> ;
+    owl:imports <https://id.exergism.org/ontology/commons/0.1-PRE2>,
+                <https://id.exergism.org/ontology/governance/0.1-PRE2> ;
+    rdfs:comment "Funding-domain TBox. Shared identity/provenance primitives and institutional Governance semantics are imported from the immutable 0.1-PRE2 version IRIs authored by Exergism-Commons/governance at commit 517c0df4c905c79ec2b2824231b40ccaa6a1b510, matching the vendored dependency closure used by Funding CI. Persistent public identifiers are issued under id.exergism.org; legal and institutional authority remains with Exergism Commons governance under applicable law and statutes."@en .
 
 # -----------------------------------------------------------------------------
 # Funding-domain record classes
