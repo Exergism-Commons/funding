@@ -27,12 +27,17 @@
       "rankEligible": false,
       "provenance": "tests/fixtures/valid-concentration-with-plan.jsonld"
     },
+    {"@id": "urn:ecf:PERSON-PLAN-OWNER", "@type": "Person"},
     {
       "@id": "urn:ecf:ECF-PLAN-DIVERSIFY-VALID-001",
       "@type": "DiversificationPlan",
       "id": "ECF-PLAN-DIVERSIFY-VALID-001",
       "title": "Reduce post-award funding concentration",
       "rationale": "Add independent unrestricted and project funding so the funder falls below the 30% rolling concentration target.",
+      "planOwner": "urn:ecf:PERSON-PLAN-OWNER",
+      "planAction": ["Submit two independent grant applications", "Develop recurring unrestricted sponsorship"],
+      "targetDate": "2027-02-15",
+      "reviewDue": "2026-12-15",
       "provenance": "tests/fixtures/valid-concentration-with-plan.jsonld"
     },
     {
@@ -42,7 +47,7 @@
       "title": "Accept temporarily concentrated funding with diversification plan",
       "status": "proposed",
       "operative": false,
-      "governanceVersion": "0.1-PRE1",
+      "governanceVersion": "0.1-DRAFT",
       "decisionDate": "2026-09-02",
       "approvalClass": "ordinary",
       "rationale": "Fixture demonstrating that concentration above 30% is reviewable when an explicit diversification plan exists.",
@@ -52,6 +57,11 @@
       "amount": "50000",
       "currency": "EUR",
       "restricted": true,
+      "rolling24MonthTotalIncomeAfter": "200000",
+      "rolling24MonthSingleFunderIncomeAfter": "70000",
+      "concentrationWindowEnd": "2026-09-02",
+      "concentrationEvidencePath": "tests/evidence/valid-concentrated-income.json",
+      "concentrationEvidenceSha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
       "singleFunderConcentrationAfter": "0.35",
       "governanceRightGranted": false,
       "ecWideIpOwnershipGranted": false,
