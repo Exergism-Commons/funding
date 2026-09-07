@@ -12,10 +12,10 @@
     },
     {
       "@id": "urn:ecf-test:ECF-STATE-DEPENDENCY-STRATEGIC-REUSED-PLAN",
-      "@type": "StrategicDependencyState",
+      "@type": ["StrategicDependencyState", "DiversificationPlan"],
       "id": "ECF-STATE-DEPENDENCY-STRATEGIC-REUSED-PLAN",
       "title": "Strategic dependency incorrectly reused as a plan",
-      "rationale": "Deliberately invalid: this state individual is also referenced through diversificationPlan but is not a DiversificationPlan.",
+      "rationale": "Deliberately invalid: one individual is explicitly classified as both a dependency state and a DiversificationPlan.",
       "reviewDue": "2026-12-02",
       "provenance": "tests/fixtures/invalid-reused-state-as-plan.jsonld"
     },
