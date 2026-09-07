@@ -9,7 +9,7 @@ on:
       - "spec/MACHINE-READABLE-GOVERNANCE.md"
       - "strategy/**"
       - "requirements-ontology.txt"
-      - "tools/build_governance_graph.py"
+      - "tools/**"
       - "tests/**"
       - ".github/workflows/machine-governance-integrity.yml"
   pull_request:
@@ -20,7 +20,7 @@ on:
       - "spec/MACHINE-READABLE-GOVERNANCE.md"
       - "strategy/**"
       - "requirements-ontology.txt"
-      - "tools/build_governance_graph.py"
+      - "tools/**"
       - "tests/**"
       - ".github/workflows/machine-governance-integrity.yml"
 
@@ -29,13 +29,13 @@ permissions:
 
 jobs:
   semantic-integrity:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: "3.12"
           cache: pip
@@ -43,6 +43,21 @@ jobs:
 
       - name: Install RDF and SHACL tooling
         run: python -m pip install -r requirements-ontology.txt
+
+      - name: Establish trusted history boundary
+        shell: bash
+        env:
+          EC_FUNDING_PUSH_BASE: ${{ github.event.before }}
+        run: |
+          set -euo pipefail
+          if [[ "${GITHUB_EVENT_NAME}" == "pull_request" ]]; then
+            echo "EC_FUNDING_HISTORY_BASE=$(git rev-parse HEAD^1)" >> "$GITHUB_ENV"
+          else
+            echo "EC_FUNDING_HISTORY_BASE=${EC_FUNDING_PUSH_BASE}" >> "$GITHUB_ENV"
+          fi
+
+      - name: Enforce persistent record and opportunity history
+        run: python tools/validate_persistent_history.py
 
       - name: Run funding governance integrity suite
         run: python -m unittest discover -s tests -p 'test_*.py' -v
@@ -55,9 +70,11 @@ jobs:
           from rdflib import Graph
 
           json.load(open('ontology/funding-context.jsonld', encoding='utf-8'))
+          json.load(open('ontology/contexts/funding-context-0.1.0-draft.jsonld', encoding='utf-8'))
           for path in (
               'ontology/funding.owl.ttl',
               'ontology/funding.shacl.ttl',
+              'ontology/funding-authority.shacl.ttl',
               'ontology/dependencies/commons.ttl',
               'ontology/dependencies/governance.ttl',
               'ontology/dependencies/governance-shapes.ttl',
@@ -67,10 +84,9 @@ jobs:
 
           records = sorted(Path('knowledge').rglob('*.jsonld'))
           assert records, 'no canonical governance records found'
-          graph = Graph()
           for path in records:
-              graph.parse(path, format='json-ld')
-          print(f'parsed {len(records)} canonical JSON-LD records into {len(graph)} triples')
+              Graph().parse(path, format='json-ld')
+          print(f'parsed {len(records)} canonical/historical JSON-LD records')
           PY
 
       - name: Build derived governance graph twice
@@ -83,7 +99,7 @@ jobs:
           cmp build-a/funding-governance.nt build-b/funding-governance.nt
           cmp build-a/funding-governance-build.json build-b/funding-governance-build.json
 
-      - name: Validate live graph with composed SHACL profile
+      - name: Validate live graph with composed SHACL and authority profiles
         run: |
           python - <<'PY'
           from rdflib import Graph
@@ -98,6 +114,7 @@ jobs:
               data.parse(path, format='turtle')
 
           shapes = Graph().parse('ontology/funding.shacl.ttl', format='turtle')
+          shapes.parse('ontology/funding-authority.shacl.ttl', format='turtle')
           shapes.parse('ontology/dependencies/governance-shapes.ttl', format='turtle')
 
           conforms, _, report = validate(
@@ -111,5 +128,5 @@ jobs:
           )
           if not conforms:
               raise SystemExit(report)
-          print('composed Funding + Governance SHACL profile conforms')
+          print('composed Funding + Governance + authority SHACL profile conforms')
           PY
