@@ -95,6 +95,26 @@ class FundingAuthorityProfileTests(unittest.TestCase):
         """
         self.assert_rejected(ttl, "cannot also be")
 
+    def test_acceptance_concentration_evidence_requires_named_funder(self):
+        ttl = """
+            @prefix ec: <https://id.exergism.org/commons#> .
+            @prefix ecg: <https://id.exergism.org/governance#> .
+            @prefix ecf: <https://id.exergism.org/funding#> .
+            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+            <urn:phase> a ecf:NormalState ; ec:stableId "ECF-STATE-PHASE-FUNDER-TEST" ; ec:title "Phase" ; ec:rationale "Test" ; ec:reviewDue "2027-09-01"^^xsd:date ; ec:provenance "test" .
+            <urn:dependency> a ecf:DiversifiedState ; ec:stableId "ECF-STATE-DEPENDENCY-FUNDER-TEST" ; ec:title "Dependency" ; ec:rationale "Test" ; ec:reviewDue "2027-09-01"^^xsd:date ; ec:provenance "test" .
+            <urn:opportunity> a ecf:FundingOpportunity ; ec:stableId "ECF-OPP-FUNDER-TEST" ; ec:title "Opportunity" ; ec:provenance "test" ; ecf:rankEligible false .
+            <urn:decision> a ecf:FundingAcceptanceDecision ;
+                ec:stableId "ECF-DEC-FUNDER-TEST" ; ec:title "Acceptance" ; ec:status "proposed" ; ec:operative false ; ec:provenance "test" ; ec:rationale "Missing funder" ;
+                ecg:governanceVersion "0.1-DRAFT" ; ecg:decisionDate "2026-09-07"^^xsd:date ; ecg:decisionClass ecg:OrdinaryApproval ;
+                ecf:opportunity <urn:opportunity> ; ecf:institutionalPhase <urn:phase> ; ecf:dependencyState <urn:dependency> ;
+                ecf:amount 20.0 ; ecf:currency "EUR" ; ecf:restricted false ;
+                ecf:rolling24MonthTotalIncomeAfter 100.0 ; ecf:rolling24MonthSingleFunderIncomeAfter 20.0 ;
+                ecf:concentrationWindowEnd "2026-09-07"^^xsd:date ; ecf:concentrationEvidencePath "test.csv" ; ecf:concentrationEvidenceSha256 "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" ;
+                ecf:governanceRightGranted false ; ecf:ecWideIpOwnershipGranted false ; ecf:exclusiveCoreInfrastructureRightGranted false .
+        """
+        self.assert_rejected(ttl, "funder")
+
 
 if __name__ == "__main__":
     unittest.main()
