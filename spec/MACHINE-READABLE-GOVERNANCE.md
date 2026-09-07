@@ -59,15 +59,20 @@ Artifacts:
 - `ontology/funding.owl.ttl` — Funding-owned OWL TBox;
 - `ontology/funding-context.jsonld` — Git-native JSON-LD context composing Funding, Commons and Governance terms;
 - `ontology/funding.shacl.ttl` — Funding-owned policy constraints;
-- `ontology/dependencies/governance-shapes.ttl` — pinned, non-authoritative validation snapshot for the Governance `Vote` and `ConflictDeclaration` shapes consumed by Funding;
+- `ontology/dependencies/commons.ttl` — byte-for-byte pinned Commons ontology snapshot;
+- `ontology/dependencies/governance.ttl` — byte-for-byte pinned Governance ontology snapshot;
+- `ontology/dependencies/governance-shapes.ttl` — byte-for-byte pinned Governance SHACL profile, including `GovernanceDecisionShape`, `DelegationShape`, `MembershipRecordShape`, `VoteShape` and `ConflictDeclarationShape`;
+- `ontology/dependencies/manifest.json` — source commit and immutable Git blob identities for the vendored Governance dependency closure;
 - `knowledge/` — canonical ABox records;
 - `tests/fixtures/` — deliberately valid/invalid non-canonical records;
 - `tests/test_machine_governance.py` — semantic integrity test suite;
 - `.github/workflows/machine-governance-integrity.yml` — CI enforcement.
 
-The dependency snapshot does not transfer semantic ownership to Funding. Its source commit is recorded in the snapshot itself; semantic changes must originate in `Exergism-Commons/governance` and be deliberately synchronized here so validation remains deterministic and does not depend on network access.
+The dependency snapshots do not transfer semantic ownership to Funding. They are copied from the Governance source commit recorded in the manifest, and CI recomputes each vendored file's Git blob identity. Semantic changes must originate in `Exergism-Commons/governance` and be deliberately synchronized here so validation remains deterministic and does not depend on network access.
 
-Canonical records and derived opportunity records MUST use the HTTP record base above. Non-canonical test fixtures MAY use non-public IRIs so that tests do not mint fake persistent identifiers.
+Funding validates against the composed Funding + Governance SHACL profile. The ontology triples are made available to SHACL so explicit `rdf:type` and the `rdfs:subClassOf` hierarchy can be used, but general RDFS entailment is deliberately disabled. In particular, `rdfs:domain` and `rdfs:range` must not manufacture a class membership that a `sh:class` constraint is intended to verify.
+
+Canonical records and derived opportunity records MUST use the HTTP record base above. Every canonical JSON-LD document under `knowledge/` MUST carry a stable `id`, the exact corresponding `@id`, and non-empty provenance. Non-canonical test fixtures MAY use non-public IRIs so that tests do not mint fake persistent identifiers.
 
 The identifier architecture is intentionally cross-project but authority remains separated:
 
@@ -243,7 +248,7 @@ The pre-1.0 profile is intentionally narrow. Candidate next layers are:
 3. reserve and Endowment allocation decisions;
 4. annual Endowment spending-rule computation;
 5. treasury liquidity buckets;
-6. quorum/majority profiles and broader Governance validation composition beyond the delegated Vote/ConflictDeclaration checks already consumed here;
+6. quorum/majority profiles and versioned policy checks that are intentionally outside the current structural Governance SHACL profile;
 7. immutable governance snapshots binding policy versions to decisions;
 8. SPARQL dependency checks showing which decisions become stale when a policy or funding condition changes;
 9. formal bootstrap exit criteria once EC has enough financial history to calibrate them;
