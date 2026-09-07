@@ -16,6 +16,10 @@ Dependencies used by this pre-1.0 normalization:
 
 - shared EC primitives: `https://id.exergism.org/commons#`
 - institutional governance: `https://id.exergism.org/governance#`
+- immutable Commons ontology snapshot: `https://id.exergism.org/ontology/commons/06e614c21f9623658c16175a381279f9c36ef526`
+- immutable Governance ontology snapshot: `https://id.exergism.org/ontology/governance/06e614c21f9623658c16175a381279f9c36ef526`
+
+`funding.owl.ttl` imports the two commit-addressed ontology snapshots rather than the mutable/current ontology routes. Those public imports therefore identify the same Governance commit whose byte-for-byte ontology and SHACL files are vendored under `ontology/dependencies/` for offline validation. `ontology/dependencies/manifest.json` records the expected upstream Git blobs, and the dependency-provenance CI job fetches the declared Governance commit and proves `upstream blob == manifest blob == vendored bytes`.
 
 The Funding repository remains authoritative only for funding-specific semantics. It intentionally does **not** redefine generic `Actor`, `Person`, `Organization`, `GovernanceRecord`, `GovernanceDecision`, `Vote`, conflict, identity or provenance terms. Those are reused from the shared/Governance vocabularies once their corresponding draft architecture is adopted.
 
