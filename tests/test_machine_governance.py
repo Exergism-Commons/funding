@@ -272,16 +272,24 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
             self.assertIsInstance(provenance, str, path)
             self.assertTrue(provenance.strip(), path)
 
-    def test_canonical_knowledge_uses_id_exergism_record_base(self):
-        graph = Graph()
+    def test_normalized_knowledge_uses_commons_stable_id_without_reinterpreting_legacy_record(self):
         paths = sorted((ROOT / "knowledge").rglob("*.jsonld"))
         self.assertGreater(len(paths), 0)
-        for path in paths:
-            graph.parse(path.as_posix(), format="json-ld")
+        legacy_path = ROOT / "knowledge" / "decisions" / "ECF-DEC-MRG-BOOTSTRAP-001.jsonld"
+        legacy = json.loads(legacy_path.read_text(encoding="utf-8"))
+        self.assertEqual(
+            legacy["@context"],
+            "../../ontology/contexts/funding-context-0.1.0-draft.jsonld",
+        )
 
-        records = list(graph.subject_objects(EC.stableId))
-        self.assertEqual(len(records), len(paths))
-        for subject, stable_id in records:
+        for path in paths:
+            document = json.loads(path.read_text(encoding="utf-8"))
+            if path == legacy_path:
+                continue
+            graph = Graph().parse(path.as_posix(), format="json-ld")
+            stable_ids = list(graph.subject_objects(EC.stableId))
+            self.assertEqual(len(stable_ids), 1, path)
+            subject, stable_id = stable_ids[0]
             self.assertEqual(str(subject), f"{RECORD_BASE}{stable_id}")
 
     def test_canonical_knowledge_conforms(self):
