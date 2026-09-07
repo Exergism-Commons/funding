@@ -62,6 +62,9 @@ jobs:
       - name: Enforce canonical review deadlines
         run: python tools/validate_temporal_governance.py
 
+      - name: Verify canonical evidence bindings
+        run: python tools/validate_evidence_bindings.py
+
       - name: Run funding governance integrity suite
         run: python -m unittest discover -s tests -p 'test_*.py' -v
 
