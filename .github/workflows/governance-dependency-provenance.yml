@@ -1,0 +1,79 @@
+name: Governance dependency provenance
+
+on:
+  push:
+    paths:
+      - "ontology/dependencies/**"
+      - "ontology/funding.owl.ttl"
+      - ".github/workflows/governance-dependency-provenance.yml"
+  pull_request:
+    paths:
+      - "ontology/dependencies/**"
+      - "ontology/funding.owl.ttl"
+      - ".github/workflows/governance-dependency-provenance.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  upstream-provenance:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch declared Governance source commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_commit="06e614c21f9623658c16175a381279f9c36ef526"
+          upstream="$RUNNER_TEMP/governance-upstream"
+          git init "$upstream"
+          git -C "$upstream" remote add origin https://github.com/Exergism-Commons/governance.git
+          git -C "$upstream" fetch --depth=1 origin "$source_commit"
+          echo "UPSTREAM_REPO=$upstream" >> "$GITHUB_ENV"
+
+      - name: Verify manifest, upstream blobs and immutable imports
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib
+          import json
+          import os
+          import subprocess
+
+          root = Path.cwd()
+          dependency_dir = root / "ontology" / "dependencies"
+          manifest = json.loads((dependency_dir / "manifest.json").read_text(encoding="utf-8"))
+          expected_commit = "06e614c21f9623658c16175a381279f9c36ef526"
+          expected_repo = "Exergism-Commons/governance"
+
+          assert manifest["source_repository"] == expected_repo
+          assert manifest["source_commit"] == expected_commit
+
+          upstream = os.environ["UPSTREAM_REPO"]
+          for filename, metadata in manifest["files"].items():
+              source_path = metadata["source_path"]
+              upstream_sha = subprocess.check_output(
+                  ["git", "-C", upstream, "rev-parse", f"FETCH_HEAD:{source_path}"],
+                  text=True,
+              ).strip()
+              local = (dependency_dir / filename).read_bytes()
+              header = f"blob {len(local)}\0".encode("ascii")
+              local_sha = hashlib.sha1(header + local).hexdigest()
+              declared_sha = metadata["git_blob_sha"]
+              assert upstream_sha == declared_sha, (
+                  f"manifest provenance mismatch for {filename}: "
+                  f"upstream {upstream_sha}, manifest {declared_sha}"
+              )
+              assert local_sha == upstream_sha, (
+                  f"vendored dependency {filename} differs from upstream blob {upstream_sha}"
+              )
+
+          ontology = (root / "ontology" / "funding.owl.ttl").read_text(encoding="utf-8")
+          for name in ("commons", "governance"):
+              iri = f"https://id.exergism.org/ontology/{name}/{expected_commit}"
+              assert f"<{iri}>" in ontology, f"Funding must import immutable dependency IRI {iri}"
+          assert "owl:imports <https://id.exergism.org/ontology/commons>," not in ontology
+          assert "<https://id.exergism.org/ontology/governance> ;" not in ontology
+          print("Governance dependency provenance and immutable imports verified")
+          PY
