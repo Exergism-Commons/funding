@@ -86,21 +86,21 @@ ecf:HostedRecordRoleSeparationShape a sh:NodeShape ;
             PREFIX ecf: <https://id.exergism.org/funding#>
             PREFIX ecg: <https://id.exergism.org/governance#>
             SELECT $this WHERE {
-              VALUES ?fundingType {
-                ecf:FundingOpportunity
-                ecf:FundingAcceptanceDecision
-                ecf:CompensationDecision
-                ecf:EndowmentPrincipalWithdrawalDecision
-                ecf:DiversificationPlan
-                ecf:InstitutionalFundingState
-              }
-              VALUES ?governanceInfrastructureType {
-                ecg:Vote
-                ecg:ConflictDeclaration
-                ecg:Delegation
-                ecg:MembershipRecord
-              }
               $this a ?fundingType, ?governanceInfrastructureType .
+              FILTER(?fundingType IN (
+                ecf:FundingOpportunity,
+                ecf:FundingAcceptanceDecision,
+                ecf:CompensationDecision,
+                ecf:EndowmentPrincipalWithdrawalDecision,
+                ecf:DiversificationPlan,
+                ecf:InstitutionalFundingState
+              ))
+              FILTER(?governanceInfrastructureType IN (
+                ecg:Vote,
+                ecg:ConflictDeclaration,
+                ecg:Delegation,
+                ecg:MembershipRecord
+              ))
             }
         """
     ] .
