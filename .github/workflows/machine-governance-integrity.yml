@@ -65,6 +65,9 @@ jobs:
       - name: Verify canonical evidence bindings
         run: python tools/validate_evidence_bindings.py
 
+      - name: Verify mutable context matches frozen 0.2.0-pre1 context
+        run: cmp ontology/funding-context.jsonld ontology/contexts/funding-context-0.2.0-pre1.jsonld
+
       - name: Run funding governance integrity suite
         run: python -m unittest discover -s tests -p 'test_*.py' -v
 
@@ -77,6 +80,7 @@ jobs:
 
           json.load(open('ontology/funding-context.jsonld', encoding='utf-8'))
           json.load(open('ontology/contexts/funding-context-0.1.0-draft.jsonld', encoding='utf-8'))
+          json.load(open('ontology/contexts/funding-context-0.2.0-pre1.jsonld', encoding='utf-8'))
           for path in (
               'ontology/funding.owl.ttl',
               'ontology/funding.shacl.ttl',
