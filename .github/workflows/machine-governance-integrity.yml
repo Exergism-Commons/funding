@@ -109,6 +109,14 @@ jobs:
           cmp build-a/funding-governance.nt build-b/funding-governance.nt
           cmp build-a/funding-governance-build.json build-b/funding-governance-build.json
 
+      - name: Build public resolver projection twice
+        run: |
+          python tools/export_publication.py --output-dir publication-a
+          python tools/export_publication.py --output-dir publication-b
+          diff -ru publication-a publication-b
+          python -m json.tool publication-a/manifest.json >/dev/null
+          test "$(find publication-a/records -type f -name '*.jsonld' | wc -l | tr -d ' ')" = "7"
+
       - name: Validate live graph with composed SHACL and authority profiles
         run: |
           python - <<'PY'
