@@ -55,7 +55,13 @@ jobs:
           from rdflib import Graph
 
           json.load(open('ontology/funding-context.jsonld', encoding='utf-8'))
-          for path in ('ontology/funding.owl.ttl', 'ontology/funding.shacl.ttl'):
+          for path in (
+              'ontology/funding.owl.ttl',
+              'ontology/funding.shacl.ttl',
+              'ontology/dependencies/commons.ttl',
+              'ontology/dependencies/governance.ttl',
+              'ontology/dependencies/governance-shapes.ttl',
+          ):
               graph = Graph().parse(path, format='turtle')
               print(f'parsed {path}: {len(graph)} triples')
 
@@ -77,5 +83,33 @@ jobs:
           cmp build-a/funding-governance.nt build-b/funding-governance.nt
           cmp build-a/funding-governance-build.json build-b/funding-governance-build.json
 
-      - name: Validate live opportunities and governance records with SHACL
-        run: pyshacl -s ontology/funding.shacl.ttl -e ontology/funding.owl.ttl -i rdfs build-a/funding-governance.ttl
+      - name: Validate live graph with composed SHACL profile
+        run: |
+          python - <<'PY'
+          from rdflib import Graph
+          from pyshacl import validate
+
+          data = Graph().parse('build-a/funding-governance.ttl', format='turtle')
+          for path in (
+              'ontology/dependencies/commons.ttl',
+              'ontology/dependencies/governance.ttl',
+              'ontology/funding.owl.ttl',
+          ):
+              data.parse(path, format='turtle')
+
+          shapes = Graph().parse('ontology/funding.shacl.ttl', format='turtle')
+          shapes.parse('ontology/dependencies/governance-shapes.ttl', format='turtle')
+
+          conforms, _, report = validate(
+              data,
+              shacl_graph=shapes,
+              inference='none',
+              advanced=True,
+              abort_on_first=False,
+              allow_infos=False,
+              allow_warnings=False,
+          )
+          if not conforms:
+              raise SystemExit(report)
+          print('composed Funding + Governance SHACL profile conforms')
+          PY
