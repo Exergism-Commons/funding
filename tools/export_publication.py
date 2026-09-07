@@ -8,6 +8,7 @@ its outputs, but must not invent or reinterpret Funding semantics itself.
 from __future__ import annotations
 
 import argparse
+from decimal import Decimal
 import hashlib
 import json
 from pathlib import Path
@@ -19,6 +20,8 @@ ROOT = Path(__file__).resolve().parents[1]
 RECORD_BASE = "https://id.exergism.org/funding/id/"
 LEGACY_CONTEXT_IRI = "https://id.exergism.org/context/funding/0.1.0-draft"
 CURRENT_CONTEXT_IRI = "https://id.exergism.org/context/funding/0.2.0-pre1"
+LEGACY_SOURCE_CONTEXT = "../../ontology/contexts/funding-context-0.1.0-draft.jsonld"
+CURRENT_SOURCE_CONTEXT = "../../ontology/funding-context.jsonld"
 
 DIMENSIONS = (
     ("fit", "fit"),
@@ -41,6 +44,15 @@ def stable_token(value: str) -> str:
     return token
 
 
+def score(value, key: str, opportunity_id: str):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError(f"{opportunity_id}: {key} must be numeric")
+    parsed = Decimal(str(value))
+    if parsed < 0 or parsed > 1:
+        raise ValueError(f"{opportunity_id}: {key} must be in [0,1]")
+    return value
+
+
 def write_json(path: Path, document: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -53,11 +65,17 @@ def export_knowledge(output_dir: Path) -> list[dict]:
         stable_id = document.get("id")
         if not isinstance(stable_id, str) or not stable_id:
             raise ValueError(f"{source}: missing stable id")
-        source_context = str(document.get("@context", ""))
-        if source_context.endswith("funding-context-0.1.0-draft.jsonld"):
+        if document.get("@id") != RECORD_BASE + stable_id:
+            raise ValueError(f"{source}: canonical @id does not match stable id")
+
+        source_context = document.get("@context")
+        if source_context == LEGACY_SOURCE_CONTEXT:
             document["@context"] = LEGACY_CONTEXT_IRI
-        else:
+        elif source_context == CURRENT_SOURCE_CONTEXT:
             document["@context"] = CURRENT_CONTEXT_IRI
+        else:
+            raise ValueError(f"{source}: unsupported publication context {source_context!r}")
+
         target = output_dir / "records" / f"{stable_id}.jsonld"
         write_json(target, document)
         artifacts.append(
@@ -74,22 +92,40 @@ def export_knowledge(output_dir: Path) -> list[dict]:
 def export_opportunities(output_dir: Path) -> list[dict]:
     source = ROOT / "data" / "opportunities.yaml"
     document = yaml.safe_load(source.read_text(encoding="utf-8"))
+    if not isinstance(document, dict):
+        raise ValueError("opportunity registry must be a mapping")
     required = list((document.get("scoring") or {}).get("required_dimensions") or [])
     expected = [source_key for source_key, _ in DIMENSIONS]
     if required != expected:
         raise ValueError(f"required scoring dimensions changed: expected {expected!r}, got {required!r}")
 
+    opportunities = document.get("opportunities") or []
+    if not isinstance(opportunities, list):
+        raise ValueError("opportunities must be a list")
+
     artifacts: list[dict] = []
-    for opportunity in document.get("opportunities") or []:
-        raw_id = opportunity["id"]
+    seen: set[str] = set()
+    for opportunity in opportunities:
+        if not isinstance(opportunity, dict):
+            raise ValueError("every opportunity must be a mapping")
+        raw_id = opportunity.get("id")
+        name = opportunity.get("name")
+        if not isinstance(raw_id, str) or not raw_id:
+            raise ValueError("every opportunity requires a non-empty id")
+        if not isinstance(name, str) or not name:
+            raise ValueError(f"{raw_id}: name is required")
+
         stable_id = f"ECF-OPP-{stable_token(raw_id)}"
+        if stable_id in seen:
+            raise ValueError(f"duplicate derived stable ID: {stable_id}")
+        seen.add(stable_id)
         complete = all(key in opportunity for key in required)
         record = {
             "@context": CURRENT_CONTEXT_IRI,
             "@id": RECORD_BASE + stable_id,
             "@type": "FundingOpportunity",
             "id": stable_id,
-            "title": opportunity["name"],
+            "title": name,
         }
         if isinstance(opportunity.get("status"), str):
             record["status"] = opportunity["status"]
@@ -97,7 +133,7 @@ def export_opportunities(output_dir: Path) -> list[dict]:
         record["rankEligible"] = complete
         for source_key, public_key in DIMENSIONS:
             if source_key in opportunity:
-                record[public_key] = opportunity[source_key]
+                record[public_key] = score(opportunity[source_key], source_key, raw_id)
         target = output_dir / "records" / f"{stable_id}.jsonld"
         write_json(target, record)
         artifacts.append(
