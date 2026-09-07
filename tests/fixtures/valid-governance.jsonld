@@ -19,6 +19,7 @@
       "reviewDue": "2027-09-02",
       "provenance": "tests/fixtures/valid-governance.jsonld"
     },
+    {"@id": "urn:ecf:FUNDER-VALID-001", "@type": "Funder"},
     {
       "@id": "urn:ecf:ECF-OPP-VALID-001",
       "@type": "FundingOpportunity",
@@ -38,6 +39,7 @@
       "decisionDate": "2026-09-02",
       "approvalClass": "ordinary",
       "rationale": "Fixture demonstrating an acceptance decision below concentration safeguards with no governance or EC-wide IP rights granted.",
+      "funder": "urn:ecf:FUNDER-VALID-001",
       "opportunity": "urn:ecf:ECF-OPP-VALID-001",
       "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-NORMAL-VALID-001",
       "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-DIVERSIFIED-VALID-001",
