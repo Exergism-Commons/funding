@@ -45,9 +45,17 @@ def git_blob_sha(data: bytes) -> str:
 
 
 def validate_graph(data_graph: Graph, *, fixture: bool = False):
-    ontology_graph = Graph().parse(COMMONS_ONTOLOGY.as_posix(), format="turtle")
-    ontology_graph.parse(GOVERNANCE_ONTOLOGY.as_posix(), format="turtle")
-    ontology_graph.parse(ONTOLOGY.as_posix(), format="turtle")
+    # Put the ontology triples in the validation graph so SHACL can use the
+    # explicit rdf:type/rdfs:subClassOf hierarchy without enabling the broader
+    # RDFS entailment regime. In particular, rdfs:domain/rdfs:range must not
+    # manufacture types that a sh:class constraint is meant to validate.
+    validation_graph = Graph()
+    for triple in data_graph:
+        validation_graph.add(triple)
+    validation_graph.parse(COMMONS_ONTOLOGY.as_posix(), format="turtle")
+    validation_graph.parse(GOVERNANCE_ONTOLOGY.as_posix(), format="turtle")
+    validation_graph.parse(ONTOLOGY.as_posix(), format="turtle")
+
     shapes_graph = Graph().parse(SHAPES.as_posix(), format="turtle")
     shapes_graph.parse(GOVERNANCE_SHAPES.as_posix(), format="turtle")
     if fixture:
@@ -63,10 +71,9 @@ def validate_graph(data_graph: Graph, *, fixture: bool = False):
             )
         )
     return shacl_validate(
-        data_graph,
+        validation_graph,
         shacl_graph=shapes_graph,
-        ont_graph=ontology_graph,
-        inference="rdfs",
+        inference="none",
         advanced=True,
         abort_on_first=False,
         allow_infos=False,
@@ -173,7 +180,7 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         self.assertFalse(conforms)
         self.assertIn("operative", report)
 
-    def test_active_member_can_vote_via_governance_subclass_inference(self):
+    def test_active_member_can_vote_via_governance_subclass_hierarchy(self):
         graph = Graph().parse(
             data=f"""
                 @prefix ecg: <{GOVERNANCE_NAMESPACE}> .
@@ -186,6 +193,22 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         )
         conforms, _, report = validate_graph(graph)
         self.assertTrue(conforms, report)
+
+    def test_governance_range_axiom_does_not_manufacture_person_type(self):
+        graph = Graph().parse(
+            data=f"""
+                @prefix ec: <{COMMONS_NAMESPACE}> .
+                @prefix ecg: <{GOVERNANCE_NAMESPACE}> .
+                <urn:organization> a ec:Organization .
+                <urn:vote> a ecg:Vote ;
+                    ecg:voter <urn:organization> ;
+                    ecg:voteValue "for" .
+            """,
+            format="turtle",
+        )
+        conforms, _, report = validate_graph(graph)
+        self.assertFalse(conforms)
+        self.assertIn("Person", report)
 
     def test_delegated_governance_vote_shape_rejects_legacy_vote_value(self):
         graph = Graph().parse(
@@ -236,6 +259,19 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
         self.assertFalse(conforms)
         self.assertIn("Canonical funding-record IRIs", report)
 
+    def test_each_canonical_knowledge_document_has_identity_and_provenance(self):
+        paths = sorted((ROOT / "knowledge").rglob("*.jsonld"))
+        self.assertGreater(len(paths), 0)
+        for path in paths:
+            document = json.loads(path.read_text(encoding="utf-8"))
+            stable_id = document.get("id")
+            self.assertIsInstance(stable_id, str, path)
+            self.assertRegex(stable_id, r"^ECF-[A-Z0-9-]+$", path)
+            self.assertEqual(document.get("@id"), f"{RECORD_BASE}{stable_id}", path)
+            provenance = document.get("provenance")
+            self.assertIsInstance(provenance, str, path)
+            self.assertTrue(provenance.strip(), path)
+
     def test_canonical_knowledge_uses_id_exergism_record_base(self):
         graph = Graph()
         paths = sorted((ROOT / "knowledge").rglob("*.jsonld"))
@@ -244,7 +280,7 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
             graph.parse(path.as_posix(), format="json-ld")
 
         records = list(graph.subject_objects(EC.stableId))
-        self.assertGreater(len(records), 0)
+        self.assertEqual(len(records), len(paths))
         for subject, stable_id in records:
             self.assertEqual(str(subject), f"{RECORD_BASE}{stable_id}")
 
