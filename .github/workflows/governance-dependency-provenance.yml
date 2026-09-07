@@ -17,22 +17,22 @@ permissions:
 
 jobs:
   upstream-provenance:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Fetch declared Governance source commit
         shell: bash
         run: |
           set -euo pipefail
-          source_commit="06e614c21f9623658c16175a381279f9c36ef526"
+          source_commit="517c0df4c905c79ec2b2824231b40ccaa6a1b510"
           upstream="$RUNNER_TEMP/governance-upstream"
           git init "$upstream"
           git -C "$upstream" remote add origin https://github.com/Exergism-Commons/governance.git
           git -C "$upstream" fetch --depth=1 origin "$source_commit"
           echo "UPSTREAM_REPO=$upstream" >> "$GITHUB_ENV"
 
-      - name: Verify manifest, upstream blobs and immutable imports
+      - name: Verify complete manifest, upstream blobs and OWL version imports
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -44,15 +44,35 @@ jobs:
           root = Path.cwd()
           dependency_dir = root / "ontology" / "dependencies"
           manifest = json.loads((dependency_dir / "manifest.json").read_text(encoding="utf-8"))
-          expected_commit = "06e614c21f9623658c16175a381279f9c36ef526"
+          expected_commit = "517c0df4c905c79ec2b2824231b40ccaa6a1b510"
           expected_repo = "Exergism-Commons/governance"
+          expected_files = {
+              "commons.ttl": "ontology/commons.ttl",
+              "governance.ttl": "ontology/governance.ttl",
+              "governance-shapes.ttl": "ontology/governance-shapes.ttl",
+              "downstream-authority.json": "ontology/downstream-authority.json",
+          }
 
           assert manifest["source_repository"] == expected_repo
           assert manifest["source_commit"] == expected_commit
+          assert set(manifest["files"]) == set(expected_files), (
+              "dependency manifest coverage changed; every consumed Governance dependency "
+              f"must be authenticated exactly once: {sorted(manifest['files'])}"
+          )
+
+          local_files = {
+              p.name for p in dependency_dir.iterdir()
+              if p.is_file() and p.name != "manifest.json"
+          }
+          assert local_files == set(expected_files), (
+              f"vendored dependency directory and manifest differ: local={sorted(local_files)} "
+              f"expected={sorted(expected_files)}"
+          )
 
           upstream = os.environ["UPSTREAM_REPO"]
-          for filename, metadata in manifest["files"].items():
-              source_path = metadata["source_path"]
+          for filename, source_path in expected_files.items():
+              metadata = manifest["files"][filename]
+              assert metadata["source_path"] == source_path
               upstream_sha = subprocess.check_output(
                   ["git", "-C", upstream, "rev-parse", f"FETCH_HEAD:{source_path}"],
                   text=True,
@@ -69,11 +89,18 @@ jobs:
                   f"vendored dependency {filename} differs from upstream blob {upstream_sha}"
               )
 
+          authority = json.loads((dependency_dir / "downstream-authority.json").read_text(encoding="utf-8"))
+          assert authority["governance_version"] == "0.1-DRAFT"
+          assert authority["governance_ontology_version"] == "0.1-PRE2"
+          assert authority["operative"] is False
+          assert authority["operative_decision_validation_available"] is False
+          assert authority["emergency_action_policy_adopted"] is False
+
           ontology = (root / "ontology" / "funding.owl.ttl").read_text(encoding="utf-8")
-          for name in ("commons", "governance"):
-              iri = f"https://id.exergism.org/ontology/{name}/{expected_commit}"
-              assert f"<{iri}>" in ontology, f"Funding must import immutable dependency IRI {iri}"
+          assert "owl:versionIRI <https://id.exergism.org/ontology/funding/0.2.0-pre1>" in ontology
+          assert "<https://id.exergism.org/ontology/commons/0.1-PRE2>" in ontology
+          assert "<https://id.exergism.org/ontology/governance/0.1-PRE2>" in ontology
           assert "owl:imports <https://id.exergism.org/ontology/commons>," not in ontology
           assert "<https://id.exergism.org/ontology/governance> ;" not in ontology
-          print("Governance dependency provenance and immutable imports verified")
+          print("complete Governance dependency provenance and versioned imports verified")
           PY
