@@ -1,0 +1,112 @@
+@prefix ec: <https://id.exergism.org/commons#> .
+@prefix ecg: <https://id.exergism.org/governance#> .
+@prefix ecf: <https://id.exergism.org/funding#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# Funding consumes Governance 0.1-DRAFT while organization governance is
+# explicitly non-operative. This profile is therefore intentionally fail-closed:
+# it permits proposed records and requirement classifications, but it does not
+# permit Funding to manufacture an approved/operative institutional decision.
+# When Governance eventually becomes operative this profile MUST NOT simply be
+# relaxed: it must first be replaced by a supported authority-evidence contract.
+
+ecf:HostedGovernanceDecisionAuthorityShape a sh:NodeShape ;
+    sh:targetClass ecg:GovernanceDecision ;
+    sh:property [ sh:path ec:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ec:status ; sh:minCount 1 ; sh:maxCount 1 ; sh:hasValue "proposed" ] ;
+    sh:property [ sh:path ec:operative ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
+    sh:property [ sh:path ecg:governanceVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:hasValue "0.1-DRAFT" ] ;
+    sh:property [ sh:path ecg:decisionDate ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ;
+    sh:property [ sh:path ec:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ec:provenance ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [
+        sh:path ecg:decisionClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ;
+        sh:in ( ecg:OrdinaryApproval ecg:QualifiedApproval )
+    ] .
+
+# Concentration evidence is meaningful only when the decision identifies the
+# exact funder whose rolling income is the numerator.
+ecf:FundingAcceptanceFunderBindingShape a sh:NodeShape ;
+    sh:targetClass ecf:FundingAcceptanceDecision ;
+    sh:property [ sh:path ecf:funder ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:Funder ] .
+
+# A Funding-hosted Vote/Conflict record must at least retain repository identity
+# and provenance. This is a hosting/integrity contract, not semantic ownership.
+ecf:HostedVoteIntegrityShape a sh:NodeShape ;
+    sh:targetClass ecg:Vote ;
+    sh:property [ sh:path ec:stableId ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^ECF-[A-Z0-9-]+$" ] ;
+    sh:property [ sh:path ec:provenance ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
+
+ecf:HostedConflictIntegrityShape a sh:NodeShape ;
+    sh:targetClass ecg:ConflictDeclaration ;
+    sh:property [ sh:path ec:stableId ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^ECF-[A-Z0-9-]+$" ] ;
+    sh:property [ sh:path ec:provenance ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
+
+# Funding namespace use is allow-by-declaration, not deny-by-known-legacy-name.
+# Any funding# predicate or rdf:type object present in a canonical/hosted record
+# must actually be declared by the Funding ontology. This prevents both legacy
+# moved terms and newly invented cross-domain aliases from slipping into ABox
+# data merely because SHACL ignores unknown predicates by default.
+ecf:DeclaredFundingTermUseShape a sh:NodeShape ;
+    sh:targetSubjectsOf ec:stableId ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Every funding# predicate used by a hosted record must be declared as a Funding ontology property." ;
+        sh:select """
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            SELECT $this ?term WHERE {
+              $this ?term ?value .
+              FILTER(STRSTARTS(STR(?term), "https://id.exergism.org/funding#"))
+              FILTER NOT EXISTS {
+                ?term a ?kind .
+                FILTER(?kind IN (owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty))
+              }
+            }
+        """
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Every funding# rdf:type used by a hosted record must be a declared Funding ontology class." ;
+        sh:select """
+            PREFIX owl: <http://www.w3.org/2002/07/owl#>
+            PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            SELECT $this ?term WHERE {
+              $this rdf:type ?term .
+              FILTER(STRSTARTS(STR(?term), "https://id.exergism.org/funding#"))
+              FILTER NOT EXISTS { ?term a owl:Class }
+            }
+        """
+    ] .
+
+# A domain record may specialize GovernanceDecision, but it cannot simultaneously
+# masquerade as a Vote, ConflictDeclaration, Delegation or MembershipRecord.
+ecf:HostedRecordRoleSeparationShape a sh:NodeShape ;
+    sh:targetSubjectsOf ec:stableId ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "A Funding domain record cannot also be a Governance Vote, conflict, delegation or membership record." ;
+        sh:select """
+            PREFIX ecf: <https://id.exergism.org/funding#>
+            PREFIX ecg: <https://id.exergism.org/governance#>
+            SELECT $this WHERE {
+              $this a ?fundingType, ?governanceInfrastructureType .
+              FILTER(?fundingType IN (
+                ecf:FundingOpportunity,
+                ecf:FundingAcceptanceDecision,
+                ecf:CompensationDecision,
+                ecf:EndowmentPrincipalWithdrawalDecision,
+                ecf:DiversificationPlan,
+                ecf:InstitutionalFundingState
+              ))
+              FILTER(?governanceInfrastructureType IN (
+                ecg:Vote,
+                ecg:ConflictDeclaration,
+                ecg:Delegation,
+                ecg:MembershipRecord
+              ))
+            }
+        """
+    ] .

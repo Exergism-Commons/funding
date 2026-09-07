@@ -1,66 +1,58 @@
+@prefix ec: <https://id.exergism.org/commons#> .
+@prefix ecg: <https://id.exergism.org/governance#> .
 @prefix ecf: <https://id.exergism.org/funding#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 
-# SHACL defines repository/governance-record validity. It does not execute
-# payments, accept grants, set salaries or replace the competent EC body.
+# SHACL defines repository/funding-record validity. Shared institutional
+# semantics remain owned by Governance; authority is additionally constrained
+# by funding-authority.shacl.ttl.
 
 ecf:CanonicalRecordIdentityConstraint a sh:SPARQLConstraint ;
-    sh:message "Canonical governance-record IRIs must equal https://id.exergism.org/funding/id/{stableId}." ;
+    sh:message "Canonical funding-record IRIs must equal https://id.exergism.org/funding/id/{stableId}." ;
     sh:select """
-        PREFIX ecf: <https://id.exergism.org/funding#>
+        PREFIX ec: <https://id.exergism.org/commons#>
         SELECT $this WHERE {
-          $this ecf:stableId ?id .
+          $this ec:stableId ?id .
           FILTER (STR($this) != CONCAT("https://id.exergism.org/funding/id/", STR(?id)))
         }
     """ .
 
 ecf:GovernanceRecordShape a sh:NodeShape ;
-    sh:targetClass ecf:GovernanceRecord ;
-    sh:property [
-        sh:path ecf:stableId ;
-        sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ;
-        sh:pattern "^ECF-[A-Z0-9-]+$"
-    ] ;
-    sh:property [
-        sh:path ecf:provenance ;
-        sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1
-    ] ;
-    # RDFS inference does not enforce owl:AllDisjointClasses. Require every
-    # GovernanceRecord to belong to exactly one top-level record category.
+    sh:targetClass ecf:FundingOpportunity,
+                   ecf:FundingAcceptanceDecision,
+                   ecf:CompensationDecision,
+                   ecf:EndowmentPrincipalWithdrawalDecision,
+                   ecf:DiversificationPlan,
+                   ecf:InstitutionalFundingState ;
+    sh:property [ sh:path ec:stableId ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^ECF-[A-Z0-9-]+$" ] ;
+    sh:property [ sh:path ec:provenance ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
     sh:xone (
         [ sh:class ecf:FundingOpportunity ]
-        [ sh:class ecf:GovernanceDecision ]
-        [ sh:class ecf:Vote ]
-        [ sh:class ecf:ConflictDisclosure ]
+        [ sh:class ecf:FundingAcceptanceDecision ]
+        [ sh:class ecf:CompensationDecision ]
+        [ sh:class ecf:EndowmentPrincipalWithdrawalDecision ]
         [ sh:class ecf:DiversificationPlan ]
         [ sh:class ecf:InstitutionalFundingState ]
     ) ;
-    # This canonical identity constraint is always active in the published
-    # profile. Tests that use non-public fixture IRIs explicitly remove this
-    # one constraint from an in-memory copy of the shapes graph.
     sh:sparql ecf:CanonicalRecordIdentityConstraint .
 
 ecf:GovernanceDecisionShape a sh:NodeShape ;
-    sh:targetClass ecf:GovernanceDecision ;
-    sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
-    sh:property [
-        sh:path ecf:status ; sh:minCount 1 ; sh:maxCount 1 ;
-        sh:in ( "proposed" "approved" "rejected" "superseded" )
-    ] ;
-    sh:property [ sh:path ecf:decisionDate ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ;
-    sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
-    sh:property [
-        sh:path ecf:approvalClass ; sh:minCount 1 ; sh:maxCount 1 ;
-        sh:in ( "ordinary" "qualified" "emergency" )
-    ] .
+    sh:targetClass ecf:FundingAcceptanceDecision,
+                   ecf:CompensationDecision,
+                   ecf:EndowmentPrincipalWithdrawalDecision ;
+    sh:property [ sh:path ec:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ec:status ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( "proposed" "approved" "rejected" "superseded" ) ] ;
+    sh:property [ sh:path ecg:decisionDate ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ;
+    sh:property [ sh:path ec:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ecg:decisionClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:in ( ecg:OrdinaryApproval ecg:QualifiedApproval ) ] .
 
 # Every present EIV score is constrained to [0,1]. If rankEligible=true, all
 # ten dimensions become mandatory. Missing values are never defaulted.
 ecf:FundingOpportunityShape a sh:NodeShape ;
     sh:targetClass ecf:FundingOpportunity ;
-    sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ec:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
     sh:property [ sh:path ecf:rankEligible ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ] ;
     sh:property [ sh:path ecf:fit ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
     sh:property [ sh:path ecf:fundingValue ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
@@ -91,17 +83,20 @@ ecf:FundingOpportunityShape a sh:NodeShape ;
 
 ecf:DiversificationPlanShape a sh:NodeShape ;
     sh:targetClass ecf:DiversificationPlan ;
-    sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
-    sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
+    sh:property [ sh:path ec:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ec:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ecf:planOwner ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ec:Actor ] ;
+    sh:property [ sh:path ecf:planAction ; sh:minCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ecf:targetDate ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ;
+    sh:property [ sh:path ec:reviewDue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] .
 
 # Institutional maturity and dependency are separate axes, but each state
-# individual represents exactly one concrete state. This mirrors OWL
-# disjointness in the SHACL profile used under RDFS inference.
+# individual represents exactly one concrete state.
 ecf:InstitutionalFundingStateShape a sh:NodeShape ;
     sh:targetClass ecf:InstitutionalFundingState ;
-    sh:property [ sh:path ecf:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
-    sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
-    sh:property [ sh:path ecf:reviewDue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ;
+    sh:property [ sh:path ec:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ec:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ec:reviewDue ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ;
     sh:xone (
         [ sh:class ecf:BootstrapState ]
         [ sh:class ecf:NormalState ]
@@ -116,11 +111,14 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
     sh:property [ sh:path ecf:amount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
     sh:property [ sh:path ecf:currency ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[A-Z]{3}$" ] ;
     sh:property [ sh:path ecf:restricted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ] ;
-    sh:property [ sh:path ecf:singleFunderConcentrationAfter ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
+    sh:property [ sh:path ecf:rolling24MonthTotalIncomeAfter ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minExclusive 0 ] ;
+    sh:property [ sh:path ecf:rolling24MonthSingleFunderIncomeAfter ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+    sh:property [ sh:path ecf:concentrationWindowEnd ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:date ] ;
+    sh:property [ sh:path ecf:concentrationEvidencePath ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
+    sh:property [ sh:path ecf:concentrationEvidenceSha256 ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[0-9a-f]{64}$" ] ;
+    sh:property [ sh:path ecf:singleFunderConcentrationAfter ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxInclusive 1 ] ;
     sh:property [ sh:path ecf:institutionalPhase ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:FundingPhaseState ] ;
     sh:property [ sh:path ecf:dependencyState ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:FundingDependencyState ] ;
-    # Range inference alone is insufficient: require one concrete phase and
-    # one concrete dependency class, and reject multiply-classified states.
     sh:xone (
         [ sh:property [ sh:path ecf:institutionalPhase ; sh:class ecf:BootstrapState ] ]
         [ sh:property [ sh:path ecf:institutionalPhase ; sh:class ecf:NormalState ] ]
@@ -135,15 +133,42 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
     sh:property [ sh:path ecf:exclusiveCoreInfrastructureRightGranted ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue false ] ;
     sh:sparql [
         a sh:SPARQLConstraint ;
-        sh:message "Funding above 30% rolling concentration requires an explicit DiversificationPlan." ;
+        sh:message "Single-funder rolling income cannot exceed total rolling income." ;
         sh:select """
             PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
-              $this ecf:singleFunderConcentrationAfter ?c .
-              FILTER (?c > 0.30)
+              $this ecf:rolling24MonthTotalIncomeAfter ?total ;
+                    ecf:rolling24MonthSingleFunderIncomeAfter ?funder .
+              FILTER (?funder > ?total)
+            }
+        """
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "If a concentration projection is present, it must agree with the evidence-backed amounts." ;
+        sh:select """
+            PREFIX ecf: <https://id.exergism.org/funding#>
+            SELECT $this WHERE {
+              $this ecf:rolling24MonthTotalIncomeAfter ?total ;
+                    ecf:rolling24MonthSingleFunderIncomeAfter ?funder ;
+                    ecf:singleFunderConcentrationAfter ?c .
+              FILTER (ABS((?c * ?total) - ?funder) > 0.000001)
+            }
+        """
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Funding above 30% rolling concentration requires an explicit accountable DiversificationPlan." ;
+        sh:select """
+            PREFIX ec: <https://id.exergism.org/commons#>
+            PREFIX ecf: <https://id.exergism.org/funding#>
+            SELECT $this WHERE {
+              $this ecf:rolling24MonthTotalIncomeAfter ?total ;
+                    ecf:rolling24MonthSingleFunderIncomeAfter ?funder .
+              FILTER ((?funder * 10) > (?total * 3))
               FILTER NOT EXISTS {
                 $this ecf:diversificationPlan ?plan .
-                ?plan a ecf:DiversificationPlan ; ecf:stableId ?planId .
+                ?plan a ecf:DiversificationPlan ; ec:stableId ?planId .
               }
             }
         """
@@ -152,10 +177,13 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
         a sh:SPARQLConstraint ;
         sh:message "Funding above 50% rolling concentration is strategic dependency and requires qualified approval." ;
         sh:select """
+            PREFIX ecg: <https://id.exergism.org/governance#>
             PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
-              $this ecf:singleFunderConcentrationAfter ?c ; ecf:approvalClass ?approval .
-              FILTER (?c > 0.50 && ?approval != "qualified")
+              $this ecf:rolling24MonthTotalIncomeAfter ?total ;
+                    ecf:rolling24MonthSingleFunderIncomeAfter ?funder ;
+                    ecg:decisionClass ?approval .
+              FILTER ((?funder * 2) > ?total && ?approval != ecg:QualifiedApproval)
             }
         """
     ] ;
@@ -165,8 +193,10 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
         sh:select """
             PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
-              $this ecf:singleFunderConcentrationAfter ?c ; ecf:dependencyState ?state .
-              FILTER (?c <= 0.30)
+              $this ecf:rolling24MonthTotalIncomeAfter ?total ;
+                    ecf:rolling24MonthSingleFunderIncomeAfter ?funder ;
+                    ecf:dependencyState ?state .
+              FILTER ((?funder * 10) <= (?total * 3))
               FILTER NOT EXISTS { ?state a ecf:DiversifiedState }
             }
         """
@@ -177,8 +207,10 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
         sh:select """
             PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
-              $this ecf:singleFunderConcentrationAfter ?c ; ecf:dependencyState ?state .
-              FILTER (?c > 0.30 && ?c <= 0.50)
+              $this ecf:rolling24MonthTotalIncomeAfter ?total ;
+                    ecf:rolling24MonthSingleFunderIncomeAfter ?funder ;
+                    ecf:dependencyState ?state .
+              FILTER ((?funder * 10) > (?total * 3) && (?funder * 2) <= ?total)
               FILTER NOT EXISTS { ?state a ecf:ElevatedConcentrationState }
             }
         """
@@ -189,52 +221,46 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
         sh:select """
             PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
-              $this ecf:singleFunderConcentrationAfter ?c ; ecf:dependencyState ?state .
-              FILTER (?c > 0.50)
+              $this ecf:rolling24MonthTotalIncomeAfter ?total ;
+                    ecf:rolling24MonthSingleFunderIncomeAfter ?funder ;
+                    ecf:dependencyState ?state .
+              FILTER ((?funder * 2) > ?total)
               FILTER NOT EXISTS { ?state a ecf:StrategicDependencyState }
             }
         """
     ] .
 
-ecf:VoteShape a sh:NodeShape ;
-    sh:targetClass ecf:Vote ;
-    sh:property [ sh:path ecf:voter ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:Person ] ;
-    sh:property [ sh:path ecf:voteValue ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( "approve" "reject" "abstain" ) ] .
-
-ecf:ConflictDisclosureShape a sh:NodeShape ;
-    sh:targetClass ecf:ConflictDisclosure ;
-    sh:property [ sh:path ecf:interestedParty ; sh:minCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:Person ] ;
-    sh:property [ sh:path ecf:rationale ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
-
 ecf:CompensationDecisionShape a sh:NodeShape ;
     sh:targetClass ecf:CompensationDecision ;
-    sh:property [ sh:path ecf:beneficiary ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:Person ] ;
+    sh:property [ sh:path ecf:beneficiary ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ec:Person ] ;
     sh:property [ sh:path ecf:workBasis ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] ;
     sh:property [ sh:path ecf:compensationAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
     sh:property [ sh:path ecf:currency ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[A-Z]{3}$" ] ;
-    sh:property [ sh:path ecf:conflictDisclosure ; sh:minCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:ConflictDisclosure ] ;
+    sh:property [ sh:path ecg:hasConflictDeclaration ; sh:minCount 1 ; sh:nodeKind sh:IRI ; sh:class ecg:ConflictDeclaration ] ;
     sh:sparql [
         a sh:SPARQLConstraint ;
         sh:message "A compensation beneficiary may not cast a substantive vote on their own compensation decision; their vote must be abstain or absent." ;
         sh:select """
+            PREFIX ecg: <https://id.exergism.org/governance#>
             PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this ?vote WHERE {
-              $this ecf:beneficiary ?beneficiary ; ecf:hasVote ?vote .
-              ?vote ecf:voter ?beneficiary ; ecf:voteValue ?value .
+              $this ecf:beneficiary ?beneficiary ; ecg:hasVote ?vote .
+              ?vote ecg:voter ?beneficiary ; ecg:voteValue ?value .
               FILTER (?value != "abstain")
             }
         """
     ] ;
     sh:sparql [
         a sh:SPARQLConstraint ;
-        sh:message "The compensation beneficiary must be explicitly named as an interested party in a linked conflict disclosure." ;
+        sh:message "The compensation beneficiary must be explicitly named as an interested party in a linked conflict declaration." ;
         sh:select """
+            PREFIX ecg: <https://id.exergism.org/governance#>
             PREFIX ecf: <https://id.exergism.org/funding#>
             SELECT $this WHERE {
               $this ecf:beneficiary ?beneficiary .
               FILTER NOT EXISTS {
-                $this ecf:conflictDisclosure ?disclosure .
-                ?disclosure ecf:interestedParty ?beneficiary .
+                $this ecg:hasConflictDeclaration ?disclosure .
+                ?disclosure ecg:interestedParty ?beneficiary .
               }
             }
         """
@@ -245,10 +271,5 @@ ecf:EndowmentPrincipalWithdrawalDecisionShape a sh:NodeShape ;
     sh:property [ sh:path ecf:principalWithdrawalAmount ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minExclusive 0 ] ;
     sh:property [ sh:path ecf:currency ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:pattern "^[A-Z]{3}$" ] ;
     sh:property [ sh:path ecf:exceptionalCondition ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:boolean ; sh:hasValue true ] ;
-    sh:property [ sh:path ecf:approvalClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:hasValue "qualified" ] ;
+    sh:property [ sh:path ecg:decisionClass ; sh:minCount 1 ; sh:maxCount 1 ; sh:hasValue ecg:QualifiedApproval ] ;
     sh:property [ sh:path ecf:endowmentPurpose ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ; sh:minLength 1 ] .
-
-# Membership itself never creates a distributable economic share in EC.
-ecf:NoMembershipEconomicShareShape a sh:NodeShape ;
-    sh:targetSubjectsOf ecf:membershipEconomicShare ;
-    sh:property [ sh:path ecf:membershipEconomicShare ; sh:maxCount 0 ] .

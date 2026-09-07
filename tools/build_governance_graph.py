@@ -6,6 +6,8 @@ Canonical editable sources remain:
 - knowledge/**/*.jsonld for explicit governance records.
 
 The generated RDF is disposable and must be reproducible from those sources.
+Persistent stable IDs, however, are a shared repository-wide keyspace and may
+never collide across the two canonical source families.
 """
 
 from __future__ import annotations
@@ -23,9 +25,13 @@ from rdflib.namespace import XSD
 
 
 ROOT = Path(__file__).resolve().parents[1]
+COMMONS_NAMESPACE = "https://id.exergism.org/commons#"
+GOVERNANCE_NAMESPACE = "https://id.exergism.org/governance#"
 VOCABULARY_NAMESPACE = "https://id.exergism.org/funding#"
 ONTOLOGY_IRI = "https://id.exergism.org/ontology/funding"
 RECORD_BASE = "https://id.exergism.org/funding/id/"
+EC = Namespace(COMMONS_NAMESPACE)
+ECG = Namespace(GOVERNANCE_NAMESPACE)
 ECF = Namespace(VOCABULARY_NAMESPACE)
 
 DIMENSION_PREDICATES = {
@@ -78,7 +84,7 @@ def load_opportunity_graph(path: Path) -> tuple[Graph, dict]:
         raise ValueError("opportunities must be a list")
 
     graph = Graph()
-    seen = set()
+    seen: set[str] = set()
     rank_eligible_count = 0
 
     for opportunity in opportunities:
@@ -98,12 +104,12 @@ def load_opportunity_graph(path: Path) -> tuple[Graph, dict]:
         subject = URIRef(f"{RECORD_BASE}{stable_id}")
 
         graph.add((subject, RDF.type, ECF.FundingOpportunity))
-        graph.add((subject, ECF.stableId, Literal(stable_id)))
-        graph.add((subject, ECF.title, Literal(name)))
-        graph.add((subject, ECF.provenance, Literal(f"data/opportunities.yaml#{raw_id}")))
+        graph.add((subject, EC.stableId, Literal(stable_id)))
+        graph.add((subject, EC.title, Literal(name)))
+        graph.add((subject, EC.provenance, Literal(f"data/opportunities.yaml#{raw_id}")))
 
         if isinstance(opportunity.get("status"), str):
-            graph.add((subject, ECF.status, Literal(opportunity["status"])))
+            graph.add((subject, EC.status, Literal(opportunity["status"])))
 
         complete = True
         parsed_scores: dict[str, Decimal] = {}
@@ -124,6 +130,8 @@ def load_opportunity_graph(path: Path) -> tuple[Graph, dict]:
         "schema_version": document.get("schema_version"),
         "source": "data/opportunities.yaml",
         "source_sha256": hashlib.sha256(raw).hexdigest(),
+        "commons_namespace": COMMONS_NAMESPACE,
+        "governance_namespace": GOVERNANCE_NAMESPACE,
         "opportunity_count": len(opportunities),
         "rank_eligible_count": rank_eligible_count,
         "vocabulary_namespace": VOCABULARY_NAMESPACE,
@@ -133,12 +141,20 @@ def load_opportunity_graph(path: Path) -> tuple[Graph, dict]:
     return graph, metadata
 
 
-def load_canonical_knowledge(directory: Path) -> tuple[Graph, int]:
+def load_canonical_knowledge(directory: Path) -> tuple[Graph, int, set[str]]:
     graph = Graph()
     paths = sorted(directory.rglob("*.jsonld"))
+    stable_ids: set[str] = set()
     for path in paths:
+        document = json.loads(path.read_text(encoding="utf-8"))
+        stable_id = document.get("id")
+        if not isinstance(stable_id, str) or not stable_id:
+            raise ValueError(f"{path.relative_to(ROOT)}: canonical knowledge record requires id")
+        if stable_id in stable_ids:
+            raise ValueError(f"duplicate canonical knowledge stable ID: {stable_id}")
+        stable_ids.add(stable_id)
         graph.parse(path.as_posix(), format="json-ld")
-    return graph, len(paths)
+    return graph, len(paths), stable_ids
 
 
 def sorted_ntriples(graph: Graph) -> str:
@@ -151,7 +167,14 @@ def build(output_dir: Path) -> dict:
     output_dir.mkdir(parents=True, exist_ok=True)
 
     graph, metadata = load_opportunity_graph(ROOT / "data" / "opportunities.yaml")
-    knowledge, knowledge_count = load_canonical_knowledge(ROOT / "knowledge")
+    opportunity_ids = {str(value) for value in graph.objects(None, EC.stableId)}
+    knowledge, knowledge_count, knowledge_ids = load_canonical_knowledge(ROOT / "knowledge")
+    collisions = sorted(opportunity_ids & knowledge_ids)
+    if collisions:
+        raise ValueError(
+            "stable IDs collide between data/opportunities.yaml and knowledge/: "
+            + ", ".join(collisions)
+        )
     graph += knowledge
 
     nt = sorted_ntriples(graph)
@@ -165,13 +188,11 @@ def build(output_dir: Path) -> dict:
     manifest = {
         **metadata,
         "knowledge_record_count": knowledge_count,
+        "stable_id_count": len(opportunity_ids) + len(knowledge_ids),
         "triple_count": len(graph),
         "rdf_sha256": hashlib.sha256(nt.encode("utf-8")).hexdigest(),
     }
-    manifest_path.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-        encoding="utf-8",
-    )
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True) + "\n", encoding="utf-8")
     return manifest
 
 
