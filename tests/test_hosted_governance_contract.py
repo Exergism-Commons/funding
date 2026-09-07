@@ -2,9 +2,12 @@ from pathlib import Path
 import json
 import unittest
 
+from rdflib import Graph, RDF, URIRef
+
 
 ROOT = Path(__file__).resolve().parents[1]
 KNOWLEDGE = ROOT / "knowledge"
+GOVERNANCE_DECISION = URIRef("https://id.exergism.org/governance#GovernanceDecision")
 
 
 class HostedGovernanceContractTests(unittest.TestCase):
@@ -15,14 +18,19 @@ class HostedGovernanceContractTests(unittest.TestCase):
         found = 0
         required = ("title", "status", "decisionDate", "rationale")
         for path in paths:
-            document = json.loads(path.read_text(encoding="utf-8"))
-            types = document.get("@type")
-            if isinstance(types, str):
-                types = [types]
-            if "GovernanceDecision" not in (types or []):
+            graph = Graph().parse(path.as_posix(), format="json-ld")
+            generic_decisions = set(graph.subjects(RDF.type, GOVERNANCE_DECISION))
+            if not generic_decisions:
                 continue
 
-            found += 1
+            document = json.loads(path.read_text(encoding="utf-8"))
+            found += len(generic_decisions)
+            self.assertEqual(
+                len(generic_decisions),
+                1,
+                f"{path}: canonical hosted-decision documents must contain one generic GovernanceDecision",
+            )
+
             for field in required:
                 value = document.get(field)
                 self.assertIsInstance(value, str, f"{path}: {field} must be a string")
