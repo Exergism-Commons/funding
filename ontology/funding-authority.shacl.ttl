@@ -27,6 +27,12 @@ ecf:HostedGovernanceDecisionAuthorityShape a sh:NodeShape ;
         sh:in ( ecg:OrdinaryApproval ecg:QualifiedApproval )
     ] .
 
+# Concentration evidence is meaningful only when the decision identifies the
+# exact funder whose rolling income is the numerator.
+ecf:FundingAcceptanceFunderBindingShape a sh:NodeShape ;
+    sh:targetClass ecf:FundingAcceptanceDecision ;
+    sh:property [ sh:path ecf:funder ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ; sh:class ecf:Funder ] .
+
 # A Funding-hosted Vote/Conflict record must at least retain repository identity
 # and provenance. This is a hosting/integrity contract, not semantic ownership.
 ecf:HostedVoteIntegrityShape a sh:NodeShape ;
