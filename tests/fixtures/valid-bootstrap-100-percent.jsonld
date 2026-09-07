@@ -19,6 +19,7 @@
       "reviewDue": "2026-12-02",
       "provenance": "tests/fixtures/valid-bootstrap-100-percent.jsonld"
     },
+    {"@id": "urn:ecf:FUNDER-BOOTSTRAP-FIRST-GRANT", "@type": "Funder"},
     {
       "@id": "urn:ecf:ECF-OPP-BOOTSTRAP-FIRST-GRANT",
       "@type": "FundingOpportunity",
@@ -51,6 +52,7 @@
       "decisionDate": "2026-09-02",
       "approvalClass": "qualified",
       "rationale": "The grant creates temporary 100 percent concentration because it is EC's first material funding source. The dependency is explicitly recorded and governed through a diversification plan and enhanced approval requirement.",
+      "funder": "urn:ecf:FUNDER-BOOTSTRAP-FIRST-GRANT",
       "opportunity": "urn:ecf:ECF-OPP-BOOTSTRAP-FIRST-GRANT",
       "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-BOOTSTRAP-VALID-100",
       "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-STRATEGIC-VALID-100",
