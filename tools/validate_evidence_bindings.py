@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 KNOWLEDGE = ROOT / "knowledge"
 
 
-def validate_record(path: Path) -> list[str]:
+def validate_record(path: Path, *, repository_root: Path = ROOT) -> list[str]:
     document = json.loads(path.read_text(encoding="utf-8"))
     evidence_path = document.get("concentrationEvidencePath")
     evidence_sha = document.get("concentrationEvidenceSha256")
@@ -27,9 +27,10 @@ def validate_record(path: Path) -> list[str]:
     except ValueError:
         return [f"{path}: concentrationEvidenceSha256 is not hexadecimal"]
 
-    candidate = (ROOT / evidence_path).resolve()
+    root = repository_root.resolve()
+    candidate = (root / evidence_path).resolve()
     try:
-        candidate.relative_to(ROOT.resolve())
+        candidate.relative_to(root)
     except ValueError:
         return [f"{path}: concentration evidence escapes the repository: {evidence_path}"]
     if not candidate.is_file():
