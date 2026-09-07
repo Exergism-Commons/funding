@@ -19,6 +19,7 @@
       "reviewDue": "2027-03-02",
       "provenance": "tests/fixtures/invalid-concentration.jsonld"
     },
+    {"@id": "urn:ecf:FUNDER-INVALID-CONCENTRATION", "@type": "Funder"},
     {
       "@id": "urn:ecf:ECF-OPP-INVALID-CONCENTRATION",
       "@type": "FundingOpportunity",
@@ -38,6 +39,7 @@
       "decisionDate": "2026-09-02",
       "approvalClass": "ordinary",
       "rationale": "Deliberately invalid only because no diversification plan is linked above the 30 percent threshold.",
+      "funder": "urn:ecf:FUNDER-INVALID-CONCENTRATION",
       "opportunity": "urn:ecf:ECF-OPP-INVALID-CONCENTRATION",
       "institutionalPhase": "urn:ecf:ECF-STATE-PHASE-NORMAL-INVALID-CONCENTRATION",
       "dependencyState": "urn:ecf:ECF-STATE-DEPENDENCY-ELEVATED-INVALID-CONCENTRATION",
