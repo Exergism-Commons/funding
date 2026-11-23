@@ -1,35 +1,12 @@
-from pathlib import Path
 import unittest
 
-from pyshacl import validate as shacl_validate
 from rdflib import Graph
 
-
-ROOT = Path(__file__).resolve().parents[1]
-COMMONS = ROOT / "ontology" / "dependencies" / "commons.ttl"
-GOVERNANCE = ROOT / "ontology" / "dependencies" / "governance.ttl"
-GOVERNANCE_SHAPES = ROOT / "ontology" / "dependencies" / "governance-shapes.ttl"
-FUNDING = ROOT / "ontology" / "funding.owl.ttl"
-FUNDING_SHAPES = ROOT / "ontology" / "funding.shacl.ttl"
-AUTHORITY_SHAPES = ROOT / "ontology" / "funding-authority.shacl.ttl"
+from tools.validation_profile import validate_abox
 
 
 def validate_turtle(data: str):
-    graph = Graph().parse(data=data, format="turtle")
-    for path in (COMMONS, GOVERNANCE, FUNDING):
-        graph.parse(path.as_posix(), format="turtle")
-    shapes = Graph().parse(FUNDING_SHAPES.as_posix(), format="turtle")
-    shapes.parse(GOVERNANCE_SHAPES.as_posix(), format="turtle")
-    shapes.parse(AUTHORITY_SHAPES.as_posix(), format="turtle")
-    return shacl_validate(
-        graph,
-        shacl_graph=shapes,
-        inference="none",
-        advanced=True,
-        abort_on_first=False,
-        allow_infos=False,
-        allow_warnings=False,
-    )
+    return validate_abox(Graph().parse(data=data, format="turtle"))
 
 
 def decision(extra: str = "", *, decision_class: str = "ecg:OrdinaryApproval", governance_version: str = "0.1-DRAFT", status: str = "proposed", operative: str = "false") -> str:
@@ -90,6 +67,49 @@ class FundingAuthorityProfileTests(unittest.TestCase):
                 ec:title "Dual type" ;
                 ec:provenance "tests/test_authority_profile.py" ;
                 ecf:rankEligible false ;
+                ecg:voter <urn:person> ;
+                ecg:voteValue "for" .
+        """
+        self.assert_rejected(ttl, "cannot also be")
+
+    def test_hosted_record_cannot_self_declare_funding_predicate(self):
+        ttl = decision(extra='; ecf:inventedSharedAuthority "true"') + """
+            @prefix owl: <http://www.w3.org/2002/07/owl#> .
+            ecf:inventedSharedAuthority a owl:DatatypeProperty .
+        """
+        self.assert_rejected(ttl, "schema-level")
+
+    def test_hosted_record_cannot_mint_dual_role_subclass(self):
+        ttl = """
+            @prefix ec: <https://id.exergism.org/commons#> .
+            @prefix ecg: <https://id.exergism.org/governance#> .
+            @prefix ecf: <https://id.exergism.org/funding#> .
+            @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+            <urn:person> a ec:Person .
+            <urn:DualRole> rdfs:subClassOf ecf:FundingOpportunity, ecg:Vote .
+            <https://id.exergism.org/funding/id/ECF-OPP-SUBCLASS-DUAL-TYPE> a <urn:DualRole> ;
+                ec:stableId "ECF-OPP-SUBCLASS-DUAL-TYPE" ;
+                ec:title "Subclass dual type" ;
+                ec:provenance "tests/test_authority_profile.py" ;
+                ecf:rankEligible false ;
+                ecg:voter <urn:person> ;
+                ecg:voteValue "for" .
+        """
+        self.assert_rejected(ttl, "schema-level")
+
+    def test_trusted_funding_subclass_cannot_also_be_governance_vote(self):
+        ttl = """
+            @prefix ec: <https://id.exergism.org/commons#> .
+            @prefix ecg: <https://id.exergism.org/governance#> .
+            @prefix ecf: <https://id.exergism.org/funding#> .
+            @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+            <urn:person> a ec:Person .
+            <https://id.exergism.org/funding/id/ECF-STATE-PHASE-DUAL-TYPE> a ecf:NormalState, ecg:Vote ;
+                ec:stableId "ECF-STATE-PHASE-DUAL-TYPE" ;
+                ec:title "Trusted subclass dual type" ;
+                ec:rationale "Adversarial role-separation test" ;
+                ec:reviewDue "2027-09-01"^^xsd:date ;
+                ec:provenance "tests/test_authority_profile.py" ;
                 ecg:voter <urn:person> ;
                 ecg:voteValue "for" .
         """

@@ -118,33 +118,4 @@ jobs:
           test "$(find publication-a/records -type f -name '*.jsonld' | wc -l | tr -d ' ')" = "7"
 
       - name: Validate live graph with composed SHACL and authority profiles
-        run: |
-          python - <<'PY'
-          from rdflib import Graph
-          from pyshacl import validate
-
-          data = Graph().parse('build-a/funding-governance.ttl', format='turtle')
-          for path in (
-              'ontology/dependencies/commons.ttl',
-              'ontology/dependencies/governance.ttl',
-              'ontology/funding.owl.ttl',
-          ):
-              data.parse(path, format='turtle')
-
-          shapes = Graph().parse('ontology/funding.shacl.ttl', format='turtle')
-          shapes.parse('ontology/funding-authority.shacl.ttl', format='turtle')
-          shapes.parse('ontology/dependencies/governance-shapes.ttl', format='turtle')
-
-          conforms, _, report = validate(
-              data,
-              shacl_graph=shapes,
-              inference='none',
-              advanced=True,
-              abort_on_first=False,
-              allow_infos=False,
-              allow_warnings=False,
-          )
-          if not conforms:
-              raise SystemExit(report)
-          print('composed Funding + Governance + authority SHACL profile conforms')
-          PY
+        run: python tools/validation_profile.py build-a/funding-governance.ttl

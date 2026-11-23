@@ -145,6 +145,18 @@ ecf:FundingAcceptanceDecisionShape a sh:NodeShape ;
     ] ;
     sh:sparql [
         a sh:SPARQLConstraint ;
+        sh:message "The accepted amount cannot exceed the post-award rolling income attributed to its funder." ;
+        sh:select """
+            PREFIX ecf: <https://id.exergism.org/funding#>
+            SELECT $this WHERE {
+              $this ecf:amount ?amount ;
+                    ecf:rolling24MonthSingleFunderIncomeAfter ?funder .
+              FILTER (?amount > ?funder)
+            }
+        """
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
         sh:message "If a concentration projection is present, it must agree with the evidence-backed amounts." ;
         sh:select """
             PREFIX ecf: <https://id.exergism.org/funding#>

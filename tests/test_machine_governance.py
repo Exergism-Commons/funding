@@ -1,3 +1,4 @@
+from decimal import Decimal
 from pathlib import Path
 import hashlib
 import json
@@ -5,11 +6,11 @@ import tempfile
 import unittest
 
 import yaml
-from pyshacl import validate as shacl_validate
-from rdflib import Graph, Namespace, RDF, URIRef
-from rdflib.namespace import OWL, RDFS
+from rdflib import Graph, Literal, Namespace, RDF, URIRef
+from rdflib.namespace import OWL, RDFS, XSD
 
-from tools.build_governance_graph import DIMENSION_PREDICATES, build
+from tools.build_governance_graph import DIMENSION_PREDICATES, build, load_canonical_knowledge
+from tools.validation_profile import validate_abox
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -46,38 +47,9 @@ def git_blob_sha(data: bytes) -> str:
 
 
 def validate_graph(data_graph: Graph, *, fixture: bool = False):
-    # This is the complete Funding semantic validation profile: Funding domain
-    # shapes + Governance structural shapes + the current downstream authority
-    # boundary. Tests and live validation must not use a weaker subset.
-    validation_graph = Graph()
-    for triple in data_graph:
-        validation_graph.add(triple)
-    validation_graph.parse(COMMONS_ONTOLOGY.as_posix(), format="turtle")
-    validation_graph.parse(GOVERNANCE_ONTOLOGY.as_posix(), format="turtle")
-    validation_graph.parse(ONTOLOGY.as_posix(), format="turtle")
-
-    shapes_graph = Graph().parse(SHAPES.as_posix(), format="turtle")
-    shapes_graph.parse(GOVERNANCE_SHAPES.as_posix(), format="turtle")
-    shapes_graph.parse(AUTHORITY_SHAPES.as_posix(), format="turtle")
-    if fixture:
-        # Fixture mode relaxes only canonical public-IRI allocation. Every
-        # semantic and authority invariant remains identical to production.
-        shapes_graph.remove(
-            (
-                ECF.GovernanceRecordShape,
-                SH.sparql,
-                ECF.CanonicalRecordIdentityConstraint,
-            )
-        )
-    return shacl_validate(
-        validation_graph,
-        shacl_graph=shapes_graph,
-        inference="none",
-        advanced=True,
-        abort_on_first=False,
-        allow_infos=False,
-        allow_warnings=False,
-    )
+    # The complete Funding semantic validation profile lives in one production
+    # module so tests and live validation cannot drift onto a weaker subset.
+    return validate_abox(data_graph, fixture=fixture)
 
 
 class MachineGovernanceIntegrityTests(unittest.TestCase):
@@ -275,6 +247,37 @@ class MachineGovernanceIntegrityTests(unittest.TestCase):
     def test_concentration_with_explicit_plan_conforms(self):
         conforms, _, report = validate_graph(parse_jsonld(FIXTURES / "valid-concentration-with-plan.jsonld"), fixture=True)
         self.assertTrue(conforms, report)
+
+    def test_accepted_amount_cannot_exceed_funder_rolling_income(self):
+        graph = parse_jsonld(FIXTURES / "valid-concentration-with-plan.jsonld")
+        decisions = list(graph.subjects(ECF.amount, None))
+        self.assertEqual(len(decisions), 1)
+        graph.set((decisions[0], ECF.amount, Literal(Decimal("1000000"), datatype=XSD.decimal)))
+        conforms, _, report = validate_graph(graph, fixture=True)
+        self.assertFalse(conforms, report)
+        self.assertIn("accepted amount cannot exceed", report)
+
+    def test_canonical_knowledge_cannot_carry_schema_triples(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            directory = Path(tmp) / "knowledge"
+            directory.mkdir()
+            (directory / "ECF-DEC-SCHEMA.jsonld").write_text(
+                json.dumps(
+                    {
+                        "@context": {"ecf": VOCABULARY_NAMESPACE, "owl": str(OWL), "id": "https://id.exergism.org/commons#stableId"},
+                        "@graph": [
+                            {"@id": RECORD_BASE + "ECF-DEC-SCHEMA", "id": "ECF-DEC-SCHEMA"},
+                            {"@id": "ecf:inventedSharedAuthority", "@type": "owl:DatatypeProperty"},
+                        ],
+                        "id": "ECF-DEC-SCHEMA",
+                    }
+                ),
+                encoding="utf-8",
+            )
+            graph, _, _ = load_canonical_knowledge(directory)
+        conforms, _, report = validate_graph(graph)
+        self.assertFalse(conforms, report)
+        self.assertIn("schema-level", report)
 
     def test_bootstrap_can_accept_first_funder_at_100_percent(self):
         conforms, _, report = validate_graph(parse_jsonld(FIXTURES / "valid-bootstrap-100-percent.jsonld"), fixture=True)

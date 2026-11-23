@@ -49,7 +49,9 @@ ecf:HostedConflictIntegrityShape a sh:NodeShape ;
 # Any funding# predicate or rdf:type object present in a canonical/hosted record
 # must actually be declared by the Funding ontology. This prevents both legacy
 # moved terms and newly invented cross-domain aliases from slipping into ABox
-# data merely because SHACL ignores unknown predicates by default.
+# data merely because SHACL ignores unknown predicates by default. Declarations
+# are trusted only because tools/validation_profile.py rejects hosted records
+# that declare or describe vocabulary terms themselves.
 ecf:DeclaredFundingTermUseShape a sh:NodeShape ;
     sh:targetSubjectsOf ec:stableId ;
     sh:sparql [
@@ -83,6 +85,10 @@ ecf:DeclaredFundingTermUseShape a sh:NodeShape ;
 
 # A domain record may specialize GovernanceDecision, but it cannot simultaneously
 # masquerade as a Vote, ConflictDeclaration, Delegation or MembershipRecord.
+# Membership is transitive over the trusted class hierarchy, so a subclass such
+# as NormalState counts as its InstitutionalFundingState ancestor. ABox-authored
+# subclass axioms never reach this graph: tools/validation_profile.py rejects
+# schema-level triples in hosted data before composing it with the ontologies.
 ecf:HostedRecordRoleSeparationShape a sh:NodeShape ;
     sh:targetSubjectsOf ec:stableId ;
     sh:sparql [
@@ -91,8 +97,10 @@ ecf:HostedRecordRoleSeparationShape a sh:NodeShape ;
         sh:select """
             PREFIX ecf: <https://id.exergism.org/funding#>
             PREFIX ecg: <https://id.exergism.org/governance#>
+            PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
             SELECT $this WHERE {
-              $this a ?fundingType, ?governanceInfrastructureType .
+              $this a/rdfs:subClassOf* ?fundingType .
+              $this a/rdfs:subClassOf* ?governanceInfrastructureType .
               FILTER(?fundingType IN (
                 ecf:FundingOpportunity,
                 ecf:FundingAcceptanceDecision,
