@@ -16,10 +16,11 @@ Dependencies used by this pre-1.0 normalization:
 
 - shared EC primitives: `https://id.exergism.org/commons#`
 - institutional governance: `https://id.exergism.org/governance#`
-- immutable Commons ontology snapshot: `https://id.exergism.org/ontology/commons/06e614c21f9623658c16175a381279f9c36ef526`
-- immutable Governance ontology snapshot: `https://id.exergism.org/ontology/governance/06e614c21f9623658c16175a381279f9c36ef526`
+- Commons ontology version IRI: `https://id.exergism.org/ontology/commons/0.1-PRE2`
+- Governance ontology version IRI: `https://id.exergism.org/ontology/governance/0.1-PRE2`
+- vendored source: Governance commit `517c0df4c905c79ec2b2824231b40ccaa6a1b510`
 
-`funding.owl.ttl` imports the two commit-addressed ontology snapshots rather than the mutable/current ontology routes. Those public imports therefore identify the same Governance commit whose byte-for-byte ontology and SHACL files are vendored under `ontology/dependencies/` for offline validation. `ontology/dependencies/manifest.json` records the expected upstream Git blobs, and the dependency-provenance CI job fetches the declared Governance commit and proves `upstream blob == manifest blob == vendored bytes`.
+`funding.owl.ttl` imports the two `0.1-PRE2` version IRIs rather than the mutable/current ontology routes. The byte-for-byte ontology and SHACL files of that release are vendored under `ontology/dependencies/` for offline validation. `ontology/dependencies/manifest.json` records the Governance source commit and the expected upstream Git blobs, and the dependency-provenance CI job fetches that commit, proves `upstream blob == manifest blob == vendored bytes`, and requires the `0.1-PRE2` imports.
 
 The Funding repository remains authoritative only for funding-specific semantics. It intentionally does **not** redefine generic `Actor`, `Person`, `Organization`, `GovernanceRecord`, `GovernanceDecision`, `Vote`, conflict, identity or provenance terms. Those are reused from the shared/Governance vocabularies once their corresponding draft architecture is adopted.
 
