@@ -56,6 +56,9 @@ jobs:
             echo "EC_FUNDING_HISTORY_BASE=${EC_FUNDING_PUSH_BASE}" >> "$GITHUB_ENV"
           fi
 
+      - name: Enforce single-subject canonical records
+        run: python tools/validate_canonical_records.py
+
       - name: Enforce persistent record and opportunity history
         run: python tools/validate_persistent_history.py
 
