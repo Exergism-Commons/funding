@@ -22,6 +22,7 @@ LEGACY_CONTEXT_IRI = "https://id.exergism.org/context/funding/0.1.0-draft"
 CURRENT_CONTEXT_IRI = "https://id.exergism.org/context/funding/0.2.0-pre1"
 LEGACY_SOURCE_CONTEXT = "../../ontology/contexts/funding-context-0.1.0-draft.jsonld"
 CURRENT_SOURCE_CONTEXT = "../../ontology/funding-context.jsonld"
+CANONICAL_STABLE_ID = re.compile(r"^ECF-[A-Z0-9-]+$")
 
 DIMENSIONS = (
     ("fit", "fit"),
@@ -53,6 +54,21 @@ def score(value, key: str, opportunity_id: str):
     return value
 
 
+def record_target(output_dir: Path, stable_id: str) -> Path:
+    """Return the publication path for a record, refusing non-canonical IDs.
+
+    Stable IDs become file names, so only the canonical ``ECF-`` form is
+    accepted and the resolved path must stay inside ``records/``.
+    """
+    if not CANONICAL_STABLE_ID.fullmatch(stable_id):
+        raise ValueError(f"{stable_id!r} is not a canonical stable ID (^ECF-[A-Z0-9-]+$)")
+    records = (output_dir / "records").resolve()
+    target = (records / f"{stable_id}.jsonld").resolve()
+    if target.parent != records:
+        raise ValueError(f"{stable_id!r} resolves outside the publication records directory")
+    return output_dir / "records" / f"{stable_id}.jsonld"
+
+
 def write_json(path: Path, document: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(document, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
@@ -65,6 +81,7 @@ def export_knowledge(output_dir: Path) -> list[dict]:
         stable_id = document.get("id")
         if not isinstance(stable_id, str) or not stable_id:
             raise ValueError(f"{source}: missing stable id")
+        target = record_target(output_dir, stable_id)
         if document.get("@id") != RECORD_BASE + stable_id:
             raise ValueError(f"{source}: canonical @id does not match stable id")
 
@@ -76,7 +93,6 @@ def export_knowledge(output_dir: Path) -> list[dict]:
         else:
             raise ValueError(f"{source}: unsupported publication context {source_context!r}")
 
-        target = output_dir / "records" / f"{stable_id}.jsonld"
         write_json(target, document)
         artifacts.append(
             {
@@ -134,7 +150,7 @@ def export_opportunities(output_dir: Path) -> list[dict]:
         for source_key, public_key in DIMENSIONS:
             if source_key in opportunity:
                 record[public_key] = score(opportunity[source_key], source_key, raw_id)
-        target = output_dir / "records" / f"{stable_id}.jsonld"
+        target = record_target(output_dir, stable_id)
         write_json(target, record)
         artifacts.append(
             {

@@ -43,6 +43,27 @@ class PublicationExportTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "unsupported publication context"):
             publication.export_knowledge(root / "out")
 
+    def test_knowledge_export_rejects_path_traversal_stable_id(self):
+        root = self._root()
+        source = root / "knowledge" / "decisions" / "bad.jsonld"
+        source.parent.mkdir(parents=True)
+        stable_id = "../../payload"
+        source.write_text(
+            json.dumps(
+                {
+                    "@context": publication.CURRENT_SOURCE_CONTEXT,
+                    "@id": publication.RECORD_BASE + stable_id,
+                    "id": stable_id,
+                }
+            ),
+            encoding="utf-8",
+        )
+        output = root / "out"
+        with self.assertRaisesRegex(ValueError, "canonical stable ID"):
+            publication.export_knowledge(output)
+        self.assertFalse((root / "payload.jsonld").exists())
+        self.assertFalse(output.exists() and any(output.rglob("*.jsonld")))
+
     def test_knowledge_export_rejects_noncanonical_id(self):
         root = self._root()
         source = root / "knowledge" / "decisions" / "bad.jsonld"
