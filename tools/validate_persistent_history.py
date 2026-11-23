@@ -53,7 +53,9 @@ def assert_frozen_contexts_unchanged(base: str, head: str) -> None:
     if removed:
         raise AssertionError(f"frozen JSON-LD contexts cannot disappear: {removed}")
     for path in sorted(before_paths):
-        if show(base, path) != show(head, path):
+        # Compare Git blob IDs, i.e. exact bytes: text-mode reads would hide
+        # line-ending rewrites that still change the published file hash.
+        if git("rev-parse", f"{base}:{path}") != git("rev-parse", f"{head}:{path}"):
             raise AssertionError(f"frozen JSON-LD context changed in place: {path}")
 
 

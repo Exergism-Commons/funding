@@ -18,6 +18,8 @@ class FrozenContextHistoryTests(unittest.TestCase):
         self.root = Path(directory.name)
         history.ROOT = self.root
         self._git("init", "-q")
+        # Commit bytes exactly as written, whatever the machine's global config.
+        self._git("config", "core.autocrlf", "false")
         self._write("tools/validate_persistent_history.py", "# contract marker\n")
         self._write(FROZEN, '{"@context": {"title": "https://id.exergism.org/commons#title"}}\n')
         self.base = self._commit("base")
@@ -47,6 +49,13 @@ class FrozenContextHistoryTests(unittest.TestCase):
     def test_frozen_context_cannot_change_in_place(self):
         self._write(FROZEN, '{"@context": {"title": "https://example.invalid/retargeted"}}\n')
         head = self._commit("retarget frozen context")
+        with self.assertRaisesRegex(AssertionError, "frozen JSON-LD context"):
+            history.compare_endpoint(self.base, head, bootstrap_contract=False)
+
+    def test_frozen_context_bytes_cannot_change_even_by_line_endings(self):
+        path = self.root / FROZEN
+        path.write_bytes(path.read_bytes().replace(b"\n", b"\r\n"))
+        head = self._commit("rewrite frozen context line endings")
         with self.assertRaisesRegex(AssertionError, "frozen JSON-LD context"):
             history.compare_endpoint(self.base, head, bootstrap_contract=False)
 
