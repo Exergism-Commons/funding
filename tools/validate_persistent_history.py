@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Enforce append-only Funding PIDs and opportunity identifiers across Git history."""
+"""Enforce append-only Funding PIDs, opportunity identifiers and frozen JSON-LD
+contexts across Git history."""
 
 from __future__ import annotations
 
@@ -16,6 +17,9 @@ ROOT = Path(__file__).resolve().parents[1]
 LEGACY_BOOTSTRAP = "knowledge/decisions/ECF-DEC-MRG-BOOTSTRAP-001.jsonld"
 OLD_CONTEXT_PATH = "ontology/funding-context.jsonld"
 FROZEN_CONTEXT_PATH = "ontology/contexts/funding-context-0.1.0-draft.jsonld"
+# Every versioned context is published under an immutable context IRI, so once
+# a snapshot is in trusted history its bytes can never change or disappear.
+FROZEN_CONTEXT_DIRECTORY = "ontology/contexts"
 
 
 def git(*args: str) -> str:
@@ -33,9 +37,24 @@ def show(ref: str, path: str) -> str | None:
     return result.stdout if result.returncode == 0 else None
 
 
-def knowledge_paths(ref: str) -> set[str]:
-    out = git("ls-tree", "-r", "--name-only", ref, "knowledge")
+def jsonld_paths(ref: str, directory: str) -> set[str]:
+    out = git("ls-tree", "-r", "--name-only", ref, directory)
     return {line for line in out.splitlines() if line.endswith(".jsonld")}
+
+
+def knowledge_paths(ref: str) -> set[str]:
+    return jsonld_paths(ref, "knowledge")
+
+
+def assert_frozen_contexts_unchanged(base: str, head: str) -> None:
+    before_paths = jsonld_paths(base, FROZEN_CONTEXT_DIRECTORY)
+    after_paths = jsonld_paths(head, FROZEN_CONTEXT_DIRECTORY)
+    removed = sorted(before_paths - after_paths)
+    if removed:
+        raise AssertionError(f"frozen JSON-LD contexts cannot disappear: {removed}")
+    for path in sorted(before_paths):
+        if show(base, path) != show(head, path):
+            raise AssertionError(f"frozen JSON-LD context changed in place: {path}")
 
 
 def opportunity_ids(ref: str) -> set[str]:
@@ -93,6 +112,8 @@ def compare_endpoint(base: str, head: str, *, bootstrap_contract: bool) -> None:
             assert_context_freeze_is_semantics_preserving(base, head)
             continue
         raise AssertionError(f"persistent knowledge record changed in place: {path}")
+
+    assert_frozen_contexts_unchanged(base, head)
 
     old_ids = opportunity_ids(base)
     new_ids = opportunity_ids(head)
