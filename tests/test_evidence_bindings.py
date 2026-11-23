@@ -99,13 +99,16 @@ class EvidenceBindingTests(unittest.TestCase):
 
     def test_every_bound_node_in_graph_is_checked(self):
         good = hashlib.sha256(b"evidence").hexdigest()
+        # Bad bindings sort first and last, so checking only one end cannot pass.
         root, path = self._graph_record([
-            {"@id": "urn:ecf:ECF-DEC-GOOD", "concentrationEvidencePath": "evidence.txt", "concentrationEvidenceSha256": good},
-            {"@id": "urn:ecf:ECF-DEC-BAD", "concentrationEvidencePath": "evidence.txt", "concentrationEvidenceSha256": "1" * 64},
+            {"@id": "urn:ecf:ECF-DEC-A-BAD", "concentrationEvidencePath": "evidence.txt", "concentrationEvidenceSha256": "1" * 64},
+            {"@id": "urn:ecf:ECF-DEC-M-GOOD", "concentrationEvidencePath": "evidence.txt", "concentrationEvidenceSha256": good},
+            {"@id": "urn:ecf:ECF-DEC-Z-BAD", "concentrationEvidencePath": "evidence.txt", "concentrationEvidenceSha256": "2" * 64},
         ])
         errors = validate_record(path, repository_root=root)
-        self.assertEqual(len(errors), 1, errors)
-        self.assertIn("ECF-DEC-BAD", errors[0])
+        self.assertEqual(len(errors), 2, errors)
+        self.assertIn("ECF-DEC-A-BAD", errors[0])
+        self.assertIn("ECF-DEC-Z-BAD", errors[1])
 
     def test_half_binding_inside_graph_is_rejected(self):
         root, path = self._graph_record([
