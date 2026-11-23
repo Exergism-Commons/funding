@@ -1,264 +1,216 @@
 # Machine-Readable Funding Governance
 
-> **Status: draft governance/data specification.** This repository layer validates the structure and policy-conformance of funding records. It does not itself execute legal acts, payments, contracts, investments or employment decisions.
+> **Status: draft governance/data specification.** This layer validates explicit Funding-domain state and downstream authority constraints. It does not itself execute legal acts, payments, contracts, investments, employment decisions or institutional votes.
 
 ## 1. Objective
 
 Exergism Commons (EC) treats funding as a governance domain rather than a private administrative function. Material funding, treasury, compensation and Endowment decisions should become inspectable records with machine-checkable invariants.
 
-The initial semantic stack mirrors the architecture already used elsewhere in EC:
-
 ```text
-Human policy / governance documents
+Human policy / adopted Governance
         ↓
-OWL 2 TBox                 domain semantics
+OWL 2 TBox                  vocabulary/domain semantics
         ↓
-JSON-LD ABox               concrete Git-native records
+JSON-LD ABox                Git-native records
         ↓
-SHACL                      closed policy/integrity constraints
+SHACL + repository guards   structural/integrity constraints
         ↓
-Derived RDF / SPARQL       query, audit and dependency analysis
+Derived RDF                 query/audit projection
         ↓
-GitHub review              public change/provenance surface
+Git history                 review/provenance/persistence surface
 ```
 
-The Git repository is the authoritative editable history. A future triplestore is an index, not the source of truth. Persistent public identity is provided by `id.exergism.org` and is deliberately independent of GitHub and the resolver implementation.
+The Git repository is the authoritative editable history. A future triplestore is an index, not the source of truth. Persistent public identity is provided by `id.exergism.org` and is independent of GitHub and resolver implementation.
 
 ## 2. Authority boundary
 
-Three different things must never be conflated:
+Four different things must not be conflated:
 
-1. **Semantic inference** — what follows safely from the ontology.
-2. **Validation** — whether a proposed repository state satisfies SHACL constraints.
-3. **Governance decision** — an institutional act taken by the competent EC body under the statutes, applicable law and the relevant governance procedure.
+1. **Semantic inference** — what follows from the ontology.
+2. **Structural/integrity validation** — whether RDF and repository state satisfy the encoded profile.
+3. **Required decision class** — which Governance process a Funding proposal would require.
+4. **Authoritative institutional decision** — evidence that the competent EC process actually validly approved/rejected/activated the proposal.
 
-A SHACL pass means only that the machine-readable record is structurally and procedurally compatible with the encoded policy profile. It does **not** mean that a grant has legally been accepted, a salary has been lawfully authorised, money has moved, an investment is suitable, or an Endowment withdrawal is legally permitted.
+`ecg:decisionClass ecg:QualifiedApproval` means **qualified approval is required**. It does not prove quorum, electorate, votes, recusals, signatures, adoption or legal effectiveness.
 
-Likewise, a SHACL failure means the repository state conflicts with an encoded invariant. It is a governance-integrity failure, not an automatic legal conclusion.
+The pinned Governance downstream-authority snapshot currently identifies institutional Governance version `0.1-DRAFT` as `operative: false` and reports no supported operative-decision authority validator. Funding therefore operates **fail closed**: hosted Governance decisions must remain `status="proposed"` and `operative=false`. If Governance later becomes operative, Funding CI intentionally fails until a supported authority-evidence integration is reviewed and added.
 
-`id.exergism.org` is an identifier authority, not a second governance authority. The funding repository and its canonical governance process define the semantics and status of funding records; the identifier service makes those identities persistent and dereferenceable.
+A SHACL pass therefore never means money moved, a grant was legally accepted, compensation was lawfully authorised, an investment is suitable, or an Endowment withdrawal is legally permitted.
 
-## 3. Persistent namespace and artifacts
+`id.exergism.org` is an identifier/publication authority, not a second semantic or governance authority.
 
-Canonical funding identifiers are issued under the Exergism Commons persistent identifier authority:
+## 3. Namespace, versioning and dependency closure
 
 ```text
 Vocabulary namespace:  https://id.exergism.org/funding#
 Ontology IRI:          https://id.exergism.org/ontology/funding
+Version IRI:           https://id.exergism.org/ontology/funding/0.2.0-pre1
 Record base:           https://id.exergism.org/funding/id/
 ```
 
-A canonical governance record with stable ID `ECF-DEC-EXAMPLE-001` therefore has IRI:
+Funding `0.2.0-pre1` imports owner-authored immutable version IRIs:
+
+- `https://id.exergism.org/ontology/commons/0.1-PRE2`
+- `https://id.exergism.org/ontology/governance/0.1-PRE2`
+
+The Git provenance root for the consumed Commons/Governance profile is `Exergism-Commons/governance@517c0df4c905c79ec2b2824231b40ccaa6a1b510`.
+
+Vendored dependencies:
+
+- `ontology/dependencies/commons.ttl`
+- `ontology/dependencies/governance.ttl`
+- `ontology/dependencies/governance-shapes.ttl`
+- `ontology/dependencies/downstream-authority.json`
+- `ontology/dependencies/manifest.json`
+
+The provenance workflow fetches the declared Governance commit and requires exact coverage of every consumed dependency plus exact upstream Git-blob equality. Vendoring is for deterministic offline validation; it does not transfer semantic ownership to Funding.
+
+Funding validation composes:
+
+- `ontology/funding.shacl.ttl` — Funding-domain structural constraints;
+- `ontology/funding-authority.shacl.ttl` — downstream fail-closed/hosting/ownership constraints;
+- the pinned Governance structural SHACL profile.
+
+Ontology triples are present for explicit type/subclass checks, but general RDFS entailment is disabled so `rdfs:domain`/`rdfs:range` cannot manufacture types that `sh:class` is intended to validate.
+
+## 4. Persistent records and history
+
+A canonical record with stable ID `ECF-DEC-EXAMPLE-001` has IRI:
 
 ```text
 https://id.exergism.org/funding/id/ECF-DEC-EXAMPLE-001
 ```
 
-Artifacts:
+Every canonical document under `knowledge/` carries a stable `id`, exact corresponding `@id` and non-empty provenance. Public identifiers are append-only/supersession-oriented: once the persistence contract exists, CI walks Git transitions and rejects silent deletion or mutation of previously published canonical records. Material state changes should be expressed through a new record linked by `supersedes`.
 
-- `ontology/funding.owl.ttl` — OWL TBox;
-- `ontology/funding-context.jsonld` — Git-native JSON-LD context;
-- `ontology/funding.shacl.ttl` — canonical closed constraints;
-- `knowledge/` — canonical ABox records;
-- `tests/fixtures/` — deliberately valid/invalid non-canonical records;
-- `tests/test_machine_governance.py` — semantic integrity test suite;
-- `.github/workflows/machine-governance-integrity.yml` — CI enforcement.
+Opportunity IDs derived from `data/opportunities.yaml` are also treated as persistent once established. The builder rejects cross-source stable-ID collisions between derived opportunities and `knowledge/**` records.
 
-Canonical records and derived opportunity records MUST use the HTTP record base above. Non-canonical test fixtures MAY use non-public IRIs so that tests do not mint fake persistent identifiers.
+The historical `ECF-DEC-MRG-BOOTSTRAP-001` record retains its original JSON-LD interpretation through a frozen legacy context. The normalization is expressed by a later record rather than retrospectively changing the RDF meaning of PID 001.
 
-The identifier architecture is intentionally cross-project but authority remains separated:
+## 5. FundingOpportunity
 
-- Exergism vocabulary: `https://id.exergism.org/exergism#`;
-- ECL vocabulary: `https://id.exergism.org/ecl#`;
-- Funding vocabulary: `https://id.exergism.org/funding#`.
+A candidate funding/network opportunity can be `rankEligible: true` only when every Expected Institutional Value dimension is explicitly present. Positive dimensions are `fit`, `fundingValue`, `capabilityValue`, `strategicOptionality`, `autonomyValue`, `networkValue`, `recurrence`; negative dimensions are `captureRisk`, `adminCost`, `executionRisk`.
 
-Shared use of the host does not imply shared semantics or legal authority.
+Each score is `[0,1]`. Missing values are not defaulted. Completeness never implies approval.
 
-## 4. Initial domain model
+## 6. FundingAcceptanceDecision
 
-### FundingOpportunity
+A Funding acceptance proposal must identify:
 
-Represents a candidate financing/network opportunity. A record can be marked `rankEligible: true` only if every Expected Institutional Value (EIV) dimension is explicitly present:
+- the exact `FundingOpportunity`;
+- the exact `Funder` whose concentration is being measured;
+- amount/currency/restriction status;
+- institutional phase and dependency state;
+- post-award rolling-24-month total income;
+- post-award rolling-24-month income attributable to that funder;
+- concentration window end date;
+- repository evidence path plus SHA-256 binding;
+- anti-capture control flags.
 
-Positive dimensions:
-
-- `fit`
-- `fundingValue`
-- `capabilityValue`
-- `strategicOptionality`
-- `autonomyValue`
-- `networkValue`
-- `recurrence`
-
-Negative dimensions:
-
-- `captureRisk`
-- `adminCost`
-- `executionRisk`
-
-Every dimension is constrained to `[0,1]`. Missing values are not defaulted. SHACL validates completeness but does not infer a ranking or funding decision.
-
-### FundingAcceptanceDecision
-
-Represents a proposal/decision concerning acceptance of material funding. Initial hard invariants include:
-
-- no governance right may be granted merely in exchange for funding;
-- no EC-wide IP ownership may be granted to the funder;
-- no exclusive right over core EC infrastructure may be granted;
-- post-award single-funder concentration must be explicit;
-- institutional phase and dependency state must be explicit;
-- concentration above 30% requires an explicit `DiversificationPlan`;
-- concentration above 50% requires `qualified` approval.
-
-The thresholds encode the current anti-capture policy. Changing them is a governance change and should be reviewed as such.
-
-### Funding phase and dependency states
-
-Institutional maturity and funding dependency are **two separate semantic axes**.
-
-Funding phase:
-
-- `BootstrapState` — EC is in an explicitly temporary early financing phase;
-- `NormalState` — EC is no longer relying on the bootstrap designation.
-
-Dependency state:
-
-- `DiversifiedState` — single-funder concentration is `<= 30%`;
-- `ElevatedConcentrationState` — concentration is `> 30%` and `<= 50%`;
-- `StrategicDependencyState` — concentration is `> 50%`.
-
-This separation is deliberate. EC can simultaneously be:
+The author-entered `singleFunderConcentrationAfter`, when present, is only a checked projection. Threshold logic is computed from the evidence-backed numerator/denominator:
 
 ```text
-BootstrapState
-+
-StrategicDependencyState
+single * 10 <= total * 3   → <= 30%
+single * 10 >  total * 3   → > 30%
+single * 2  >  total       → > 50%
 ```
 
-For example, the first material grant can represent 100% of recorded funding. That state is not automatically forbidden. A 100% bootstrap decision can conform when:
+Additional consistency rules prevent single-funder income exceeding total income and require the accepted amount not to exceed the post-award income attributed to that funder.
 
-- the dependency is explicitly represented as `StrategicDependencyState`;
-- a `DiversificationPlan` exists;
-- approval is `qualified`;
-- no governance/IP/core-infrastructure control is granted to the funder; and
-- the bootstrap/dependency state has an explicit review date.
+### Dependency classes
 
-Thus the machine policy distinguishes:
+- `DiversifiedState` — concentration `<= 30%`;
+- `ElevatedConcentrationState` — `>30%` and `<=50%`;
+- `StrategicDependencyState` — `>50%`.
+
+Above 30%, an explicit `DiversificationPlan` is required. A plan is not a placeholder: it requires an accountable owner, one or more actions, a target date and a review date.
+
+Above 50%, `ecg:QualifiedApproval` is the required decision class. Under current non-operative Governance that remains a **requirement classification on a proposal**, not evidence that qualified approval has occurred.
+
+No funding proposal may grant governance power for money, EC-wide IP ownership, or exclusive core-infrastructure rights through the encoded acceptance flags.
+
+## 7. Bootstrap and review deadlines
+
+Institutional maturity and funding dependency are separate axes. EC may be simultaneously:
 
 ```text
-dependency detected != funding prohibited
+BootstrapState + StrategicDependencyState
 ```
 
-from:
+A first material funder may therefore account for 100% of rolling income without making the proposal intrinsically invalid, provided the dependency is explicit, an accountable diversification plan exists, QualifiedApproval is identified as required, and anti-capture firewalls remain intact.
 
-```text
-dependency hidden or unmanaged = governance-integrity failure
-```
+Canonical records carrying `reviewDue` are checked against an explicit evaluation date. An overdue canonical review fails CI. Tests can override the evaluation date for reproducibility. A plan's review date may not fall after its target date.
 
-SHACL checks that the asserted dependency-state class matches the numeric concentration. A 100% decision cannot claim `DiversifiedState` merely because EC is in bootstrap.
+This converts `reviewDue` from documentation into a fail-closed repository obligation.
 
-The ontology does **not** infer a state individual from a percentage. The state remains an explicit, reviewable governance record; SHACL checks consistency between that record and the quantitative input.
+## 8. Evidence binding
 
-### CompensationDecision
+Canonical concentration evidence is content-addressed. If a canonical record declares concentration evidence:
 
-Represents remuneration for real work rather than an economic entitlement arising from membership.
+- the path must be repository-relative and cannot escape the repository;
+- the file must exist;
+- the declared SHA-256 must be valid hex and match the exact bytes.
 
-Initial invariants include:
+Synthetic fixture paths/hashes are allowed in non-canonical adversarial fixtures because they are test data, not persistent public records.
 
-- beneficiary, work basis, amount and currency are explicit;
-- at least one conflict disclosure is linked;
-- the beneficiary is named as an interested party;
-- if the beneficiary has a recorded vote on their own compensation, it must be `abstain`.
+Generic `ec:provenance` remains descriptive metadata; Git history plus specialized content-addressed evidence bindings provide stronger integrity where policy requires it.
 
-The model deliberately does not infer employment status, tax treatment or the legality of a specific contractual form.
+## 9. CompensationDecision
 
-### EndowmentPrincipalWithdrawalDecision
+Compensation represents remuneration for real work, not membership-derived ownership. Required data include beneficiary, work basis, amount/currency and conflict declaration. The beneficiary must be named as interested party; if they have a recorded vote on their own compensation it must be `abstain`.
 
-Represents a proposal to consume principal rather than ordinary Endowment distributions.
+Votes/conflicts use Governance-owned IRIs. Funding does not define a competing vote vocabulary or membership-economic-share predicate.
 
-The initial machine policy requires:
+## 10. EndowmentPrincipalWithdrawalDecision
 
-- positive withdrawal amount;
-- explicit purpose;
-- an exceptional condition;
-- `qualified` approval.
+The structural Funding profile requires a positive principal-withdrawal amount, explicit purpose, exceptional condition and `QualifiedApproval` requirement classification.
 
-These are governance safeguards, not investment advice and not a substitute for tax/accounting/legal review.
+Under current Governance this record still remains proposed/non-operative; the decision-class label does not manufacture actual approval.
 
-## 5. Explicitly forbidden state
+## 11. Vocabulary ownership boundary
 
-`ecf:membershipEconomicShare` exists only as a detectable forbidden predicate. Any canonical record asserting a distributable economic share because of membership fails SHACL validation.
+Funding owns Funding-domain classes/properties only. Commons owns shared identity/provenance primitives; Governance owns institutional decisions, decision classes, membership, votes, conflicts, delegations and roles.
 
-This makes the repository distinction machine-checkable:
+CI enforces this at several layers:
 
-```text
-membership ≠ ownership claim
-work       → may support compensation
-capital    → belongs to EC
-```
+- Funding TBox may not redeclare known moved shared/Governance terms;
+- Funding may not mint a local class/property name already declared by Commons/Governance;
+- hosted ABox data may use `funding#` predicates/classes only if actually declared by the Funding ontology;
+- a Funding domain record cannot simultaneously masquerade as Governance Vote/Conflict/Delegation/Membership infrastructure.
 
-## 6. Decision lifecycle
+This prevents normalization from being undone by either schema or data.
 
-Recommended lifecycle for a material decision:
+## 12. Governance authority drift
 
-```text
-record proposed
-  ↓
-PR opened with dossier/evidence
-  ↓
-JSON-LD parses as RDF
-  ↓
-OWL/SHACL integrity passes
-  ↓
-human governance review
-  ↓
-competent body approves/rejects
-  ↓
-record status updated
-  ↓
-Git history preserves provenance
-```
+Funding vendors `downstream-authority.json` from Governance and tests its contract explicitly. Current assumptions include:
 
-A decision record should not be rewritten to erase a prior material outcome. Use `supersedes` for later records when the institutional state changes materially.
+- institutional version `0.1-DRAFT`;
+- Governance non-operative;
+- no operative downstream authority verifier;
+- proposed records allowed;
+- approved/operative records not authoritative;
+- EmergencyAction unavailable without an adopted emergency policy.
 
-Institutional funding-state records are also time-bounded review artifacts. `BootstrapState`, in particular, must have a `reviewDue`; it must not silently persist forever because EC was once young or small.
+If those upstream facts change, Funding intentionally fails closed until its authority integration is reviewed. A dependency update must not silently turn a structural record into an operative decision.
 
-## 7. What should become machine-readable next
+## 13. Publication contract
 
-The v0.1 profile is intentionally narrow. Candidate next layers are:
+`funding` remains semantic authority for Funding-specific material; `id` only publishes persistent representations. Adoption is staged:
 
-1. funding agreements and restriction clauses;
-2. donor/funder identities and rolling concentration calculations;
-3. reserve and Endowment allocation decisions;
-4. annual Endowment spending-rule computation;
-5. treasury liquidity buckets;
-6. conflicts/recusals and quorum/majority profiles sourced from `governance`;
-7. immutable governance snapshots binding policy versions to decisions;
-8. SPARQL dependency checks showing which decisions become stale when a policy or funding condition changes;
-9. formal bootstrap exit criteria once EC has enough financial history to calibrate them;
-10. publication and maintenance of approved HTML/RDF representations through `id.exergism.org`;
-11. convergence on shared `https://id.exergism.org/entity/...` identifiers for real-world entities referenced across EC projects.
+1. `id#8` publishes adopted Commons/Governance namespace documents, owner-authored version IRIs, authority profile and catalogs.
+2. Funding #8 lands, making Funding `0.2.0-pre1` authoritative in `funding/main`.
+3. The resolver publication PR is rebuilt from the resulting `id/main`, repinned to the **actual Funding main commit** (not the pre-squash PR head), and its publication artifacts are content-addressed against that source.
+4. Only then may Funding switch from `migrating` to `adopted` in the resolver catalog.
+5. Deployment/dereferencing smoke tests complete the cross-repository publication; merge alone is not treated as deployment.
 
-## 8. Cross-repository governance
+Funding public JSON-LD publication must use immutable/versioned contexts for historical meaning. A mutable “current” context must never retroactively change RDF semantics of already-published record bytes.
 
-The funding ontology is not the constitution of EC and is not an extension of the ECL software licence. Institutional authority should remain in the EC governance layer.
+## 14. What remains outside this profile
 
-The intended dependency direction is:
+Future work may add agreement/restriction clause semantics, treasury liquidity buckets, Endowment spending rules, richer real-world entity identifiers, and an operative Governance authority-evidence verifier once Governance adopts one.
 
-```text
-EC governance / statutes
-        ↓
-funding policies and machine profile
-        ↓
-funding records and decisions
-        ↓
-persistent public identity through id.exergism.org
-```
+Those capabilities must be added by the owning semantic/governance layer rather than inferred from repository permissions or Funding labels.
 
-ECL and other EC projects may reuse the same semantic-governance patterns, but a software licence must not silently acquire authority over salaries, treasury or the Endowment.
+## 15. Design rule
 
-The cross-project identifier authority creates stable links between projects without collapsing their authority boundaries. Historical Exergism and ECL releases are not retroactively rewritten merely because future releases migrate to `id.exergism.org`.
-
-## 9. Design rule
-
-**If a policy matters enough to constrain institutional money or power, EC should aim to make the relevant state explicit, reviewable and mechanically testable — without pretending that code replaces governance.**
+**If a policy matters enough to constrain institutional money or power, the relevant state should be explicit, reviewable and mechanically testable — without pretending that code, RDF or a decision-class label replaces governance.**

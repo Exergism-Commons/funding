@@ -1,0 +1,22 @@
+{
+  "source_repository": "Exergism-Commons/governance",
+  "source_commit": "517c0df4c905c79ec2b2824231b40ccaa6a1b510",
+  "files": {
+    "commons.ttl": {
+      "source_path": "ontology/commons.ttl",
+      "git_blob_sha": "fa78226d2dd9640508bb1945416a8c9e25fe9295"
+    },
+    "governance.ttl": {
+      "source_path": "ontology/governance.ttl",
+      "git_blob_sha": "6a17e0cc89746b3e7f4bd861dddd228073625b86"
+    },
+    "governance-shapes.ttl": {
+      "source_path": "ontology/governance-shapes.ttl",
+      "git_blob_sha": "e5c097ff156d41a1dc260526e117f7c60d5ad192"
+    },
+    "downstream-authority.json": {
+      "source_path": "ontology/downstream-authority.json",
+      "git_blob_sha": "edbe0a536be30f8a54c7a17bb575a319b7e55d7d"
+    }
+  }
+}
